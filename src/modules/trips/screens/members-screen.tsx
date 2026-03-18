@@ -11,13 +11,36 @@ import { useTripOverview, useTripPermission } from "../data/use-trips-data";
 
 export function MembersScreen() {
   const { tripId } = useParams();
-  const { trip, members, invitations, loading, error, createInvitation, revokeInvitation, removeMember } = useTripOverview(tripId);
-  const { isAdmin } = useTripPermission(tripId);
+  const {
+    trip,
+    members,
+    invitations,
+    loading,
+    error,
+    createInvitation,
+    revokeInvitation,
+    removeMember,
+    updateMemberRole
+  } = useTripOverview(tripId);
+  const { isAdmin, isGlobalAdmin } = useTripPermission(tripId);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const activeAdmins = members.filter((member) => member.status === "active" && member.role === "admin").length;
+
+  function normalizeMemberActionError(errorMessage: string) {
+    if (errorMessage.includes("LAST_ADMIN_REQUIRED")) {
+      return "Cada viaje debe conservar al menos un admin activo. Asigna otro admin antes de quitar este rol.";
+    }
+
+    if (errorMessage.includes("GLOBAL_ADMIN_REQUIRED")) {
+      return "Solo el creador global puede cambiar quien es admin en un viaje.";
+    }
+
+    return errorMessage;
+  }
 
   async function handleCreateInvitation() {
     try {
@@ -107,6 +130,11 @@ export function MembersScreen() {
         </Card>
       ) : null}
       <Card className="p-5">
+        {isGlobalAdmin ? (
+          <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+            Como creador global puedes entrar en todos los viajes y decidir que miembros tienen rol de admin.
+          </p>
+        ) : null}
         <div className="space-y-4">
           {members.length === 0 ? (
             <EmptyState title="Sin miembros" description="Todavia no hay participantes activos en este viaje." />
@@ -131,6 +159,26 @@ export function MembersScreen() {
                 <div className="flex items-center gap-2">
                   <Badge>{member.role}</Badge>
                   <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">{member.status}</Badge>
+                  {isGlobalAdmin ? (
+                    <Button
+                      variant="secondary"
+                      disabled={member.role === "admin" && activeAdmins <= 1}
+                      onClick={() => {
+                        setActionError(null);
+                        void updateMemberRole(member.id, member.role === "admin" ? "member" : "admin").catch((roleError) => {
+                          setActionError(
+                            normalizeMemberActionError(
+                              roleError instanceof Error
+                                ? roleError.message
+                                : "No se pudo actualizar el rol de este miembro."
+                            )
+                          );
+                        });
+                      }}
+                    >
+                      {member.role === "admin" ? "Quitar admin" : "Dar admin"}
+                    </Button>
+                  ) : null}
                   {isAdmin && member.role !== "admin" ? (
                     <Button
                       variant="ghost"
@@ -138,9 +186,11 @@ export function MembersScreen() {
                         setActionError(null);
                         void removeMember(member.id).catch((removalError) => {
                           setActionError(
-                            removalError instanceof Error
-                              ? removalError.message
-                              : "No se pudo expulsar a este miembro."
+                            normalizeMemberActionError(
+                              removalError instanceof Error
+                                ? removalError.message
+                                : "No se pudo expulsar a este miembro."
+                            )
                           );
                         });
                       }}

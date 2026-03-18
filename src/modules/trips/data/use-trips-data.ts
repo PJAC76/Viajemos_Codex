@@ -130,6 +130,21 @@ export function useTripOverview(tripId?: string) {
     setMembers((currentMembers) => currentMembers.filter((item) => item.id !== memberId));
   }
 
+  async function updateMemberRole(memberId: string, role: TripRole) {
+    await tripsQueries.updateMemberRole(memberId, role);
+    setMembers((currentMembers) =>
+      currentMembers
+        .map((member) => (member.id === memberId ? { ...member, role } : member))
+        .sort((left, right) => {
+          if (left.role === right.role) {
+            return left.displayName.localeCompare(right.displayName, "es");
+          }
+
+          return left.role === "admin" ? -1 : 1;
+        })
+    );
+  }
+
   return {
     trip,
     members,
@@ -141,7 +156,8 @@ export function useTripOverview(tripId?: string) {
     deleteTrip,
     createInvitation,
     revokeInvitation,
-    removeMember
+    removeMember,
+    updateMemberRole
   };
 }
 
@@ -194,6 +210,7 @@ export function useTripMembers(tripId?: string) {
 export function useTripPermission(tripId?: string) {
   const { user } = useSession();
   const [role, setRole] = useState<TripRole | null>(null);
+  const [isGlobalAdmin, setIsGlobalAdmin] = useState(false);
   const [loading, setLoading] = useState(Boolean(user && tripId));
 
   useEffect(() => {
@@ -203,6 +220,7 @@ export function useTripPermission(tripId?: string) {
       if (!user || !tripId) {
         if (active) {
           setRole(null);
+          setIsGlobalAdmin(false);
           setLoading(false);
         }
         return;
@@ -210,11 +228,14 @@ export function useTripPermission(tripId?: string) {
 
       try {
         setLoading(true);
-        const members = await tripsQueries.getMembers(tripId);
-        const membership = members.find((member) => member.userId === user.id);
+        const [nextRole, nextIsGlobalAdmin] = await Promise.all([
+          tripsQueries.getViewerRole(tripId, user.id),
+          tripsQueries.isGlobalAdmin()
+        ]);
 
         if (active) {
-          setRole(membership?.role ?? null);
+          setRole(nextRole);
+          setIsGlobalAdmin(nextIsGlobalAdmin);
         }
       } finally {
         if (active) {
@@ -232,6 +253,7 @@ export function useTripPermission(tripId?: string) {
 
   return {
     role,
+    isGlobalAdmin,
     loading,
     isAdmin: role === "admin",
     hasAccess: role !== null

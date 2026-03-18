@@ -1,7 +1,7 @@
 import { tripInvitations, tripMembers, trips } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
 import type { AuthUser } from "../../auth/domain/types";
-import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripUpsertInput } from "../domain/types";
+import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripRole, TripUpsertInput } from "../domain/types";
 
 const fallbackCoverImage =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80";
@@ -133,6 +133,22 @@ function normalizeRpcRows(data: unknown) {
   return [];
 }
 
+function normalizeScalarRpcValue<T>(data: unknown): T | null {
+  if (data === null || data === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      return null;
+    }
+
+    return data[0] as T;
+  }
+
+  return data as T;
+}
+
 async function loadProfilesMap(userIds: string[]) {
   const insforge = getInsforgeClient();
 
@@ -152,12 +168,58 @@ async function loadProfilesMap(userIds: string[]) {
 }
 
 export const tripsQueries = {
+  async isGlobalAdmin() {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return false;
+    }
+
+    const { data, error } = await insforge.database.rpc("is_global_admin");
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudieron cargar los permisos globales.");
+    }
+
+    return Boolean(normalizeScalarRpcValue<boolean>(data));
+  },
+
+  async getViewerRole(tripId: string, userId?: string): Promise<TripRole | null> {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      const member = tripMembers.find((item) => item.tripId === tripId && item.userId === userId && item.status === "active");
+      return member?.role ?? null;
+    }
+
+    const { data, error } = await insforge.database.rpc("get_trip_viewer_role", {
+      target_trip_id: tripId
+    });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudieron cargar los permisos del viaje.");
+    }
+
+    const role = normalizeScalarRpcValue<string | null>(data);
+    return role === "admin" || role === "member" ? role : null;
+  },
+
   async listTrips(userId: string) {
     const insforge = getInsforgeClient();
 
     if (!insforge) {
       const memberTripIds = new Set(tripMembers.filter((member) => member.userId === userId).map((member) => member.tripId));
       return trips.filter((trip) => memberTripIds.has(trip.id));
+    }
+
+    if (await this.isGlobalAdmin()) {
+      const tripsResult = await insforge.database.from("trips").select("*").order("start_date", { ascending: true });
+
+      if (tripsResult.error) {
+        throw new Error(tripsResult.error.message ?? "No se pudieron cargar los viajes.");
+      }
+
+      return ((tripsResult.data as Array<Record<string, unknown>> | null) ?? []).map(normalizeTrip);
     }
 
     const membershipsResult = await insforge.database
@@ -361,11 +423,46 @@ export const tripsQueries = {
       return;
     }
 
-    const { error } = await insforge.database.from("trip_members").update({ status: "removed" }).eq("id", memberId);
+    const { error } = await insforge.database.rpc("remove_trip_member", {
+      target_member_id: memberId
+    });
 
     if (error) {
       throw new Error(error.message ?? "No se pudo retirar a este miembro.");
     }
+  },
+
+  async updateMemberRole(memberId: string, nextRole: TripRole) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      const member = tripMembers.find((item) => item.id === memberId);
+
+      if (!member) {
+        throw new Error("No se encontro el miembro.");
+      }
+
+      member.role = nextRole;
+      return member;
+    }
+
+    const { data, error } = await insforge.database.rpc("set_trip_member_role", {
+      target_member_id: memberId,
+      next_role: nextRole
+    });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo actualizar el rol del miembro.");
+    }
+
+    const rows = normalizeRpcRows(data);
+    const row = rows[0];
+
+    if (!row) {
+      throw new Error("El rol se actualizo, pero no pudimos refrescar el miembro.");
+    }
+
+    return row;
   },
 
   async getInvitationPreview(token: string) {

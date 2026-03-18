@@ -3,14 +3,15 @@ import { tripsQueries } from "../modules/trips/data/trips-queries";
 
 export const tripAccessService = {
   async userHasTripAccess(userId: string, tripId: string) {
-    const members = await tripsQueries.getMembers(tripId);
-    return members.some((member) => member.userId === userId);
+    return (await tripsQueries.getViewerRole(tripId, userId)) !== null;
   },
 
   async getUserTripRole(userId: string, tripId: string): Promise<TripRole | null> {
-    const members = await tripsQueries.getMembers(tripId);
-    const member = members.find((item) => item.userId === userId);
-    return member?.role ?? null;
+    return tripsQueries.getViewerRole(tripId, userId);
+  },
+
+  async isGlobalAdmin() {
+    return tripsQueries.isGlobalAdmin();
   },
 
   async isTripAdmin(userId: string, tripId: string) {
