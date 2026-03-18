@@ -114,3 +114,4 @@ Notas:
 
 - checklist final de salida en [RELEASE_CHECKLIST.md](/C:/GPT_CODEX/Viajemos/docs/RELEASE_CHECKLIST.md)
 - conexion y mantenimiento de InsForge en [INSFORGE_SETUP.md](/C:/GPT_CODEX/Viajemos/docs/INSFORGE_SETUP.md)
+- despliegue en Vercel en [VERCEL_DEPLOY.md](/C:/GPT_CODEX/Viajemos/docs/VERCEL_DEPLOY.md)

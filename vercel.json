@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/app", "destination": "/" },
+    { "source": "/auth/:path*", "destination": "/" },
+    { "source": "/invite/:path*", "destination": "/" },
+    { "source": "/trips", "destination": "/" },
+    { "source": "/trips/:path*", "destination": "/" },
+    { "source": "/explore", "destination": "/" },
+    { "source": "/favorites", "destination": "/" },
+    { "source": "/notifications", "destination": "/" },
+    { "source": "/profile", "destination": "/" },
+    { "source": "/settings", "destination": "/" }
+  ]
+}

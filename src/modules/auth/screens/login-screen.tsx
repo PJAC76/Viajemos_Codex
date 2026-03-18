@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../../app/layouts/auth-layout";
 import { useSession } from "../../../app/providers/session-provider";
@@ -6,16 +6,26 @@ import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { hasInsforgeEnv } from "../../../lib/env";
+import { authClient } from "../data/auth-client";
 
 export function LoginScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { authMessage, signInDemo, signInWithGoogle, signInWithPassword } = useSession();
+  const { authMessage, signInDemo, signInWithGoogle, signInWithPassword, user } = useSession();
   const inviteToken = searchParams.get("invite");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const nextPath = authClient.consumePostAuthRedirect();
+    navigate(nextPath ?? (inviteToken ? `/invite/${inviteToken}` : "/trips"), { replace: true });
+  }, [inviteToken, navigate, user]);
 
   async function handleLogin() {
     try {

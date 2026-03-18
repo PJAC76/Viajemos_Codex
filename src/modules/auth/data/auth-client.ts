@@ -2,6 +2,8 @@ import { mockUser } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
 import type { AuthUser } from "../domain/types";
 
+const postAuthRedirectKey = "viajemos.post_auth_redirect";
+
 function normalizeAuthUser(user: {
   id: string;
   email: string;
@@ -22,6 +24,29 @@ function normalizeAuthUser(user: {
 }
 
 export const authClient = {
+  setPostAuthRedirect(path?: string) {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nextPath = path?.trim() || "/trips";
+    window.sessionStorage.setItem(postAuthRedirectKey, nextPath);
+  },
+
+  consumePostAuthRedirect() {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const nextPath = window.sessionStorage.getItem(postAuthRedirectKey);
+
+    if (nextPath) {
+      window.sessionStorage.removeItem(postAuthRedirectKey);
+    }
+
+    return nextPath;
+  },
+
   async getCurrentUser(): Promise<AuthUser | null> {
     const insforge = getInsforgeClient();
 
@@ -64,9 +89,11 @@ export const authClient = {
       };
     }
 
+    this.setPostAuthRedirect(redirectPath);
+
     const { data, error } = await insforge.auth.signInWithOAuth({
       provider: "google",
-      redirectTo: `${window.location.origin}${redirectPath}`
+      redirectTo: `${window.location.origin}/auth/login`
     });
 
     if (error) {
