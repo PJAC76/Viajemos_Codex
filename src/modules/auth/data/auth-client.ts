@@ -192,6 +192,10 @@ export const authClient = {
   },
 
   async signInDemo(): Promise<AuthUser> {
+    if (getInsforgeClient()) {
+      throw new Error("La sesion demo solo esta disponible cuando la app funciona sin backend real.");
+    }
+
     return mockUser;
   },
 

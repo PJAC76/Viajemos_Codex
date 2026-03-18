@@ -2,11 +2,14 @@ node_modules/
 dist/
 .agent/
 .env.local
+.env.production.local
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
 tailwind.config.js
 tailwind.config.d.ts
+.playwright-cli/
+output/
 
 # InsForge & AI agent skills
 .insforge

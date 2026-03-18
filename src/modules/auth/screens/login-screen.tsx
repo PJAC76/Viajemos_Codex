@@ -5,6 +5,7 @@ import { useSession } from "../../../app/providers/session-provider";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
+import { hasInsforgeEnv } from "../../../lib/env";
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -50,15 +51,17 @@ export function LoginScreen() {
           <Button fullWidth onClick={() => void handleLogin()} disabled={submitting || !email || !password}>
             {submitting ? "Entrando..." : "Entrar con email"}
           </Button>
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => {
-              void signInDemo().then(() => navigate(inviteToken ? `/invite/${inviteToken}` : "/trips"));
-            }}
-          >
-            Entrar con demo
-          </Button>
+          {!hasInsforgeEnv ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                void signInDemo().then(() => navigate(inviteToken ? `/invite/${inviteToken}` : "/trips"));
+              }}
+            >
+              Entrar con demo
+            </Button>
+          ) : null}
           <Button
             variant="secondary"
             fullWidth

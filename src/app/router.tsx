@@ -54,7 +54,7 @@ function ProtectedTripLayout() {
 
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
         <Route path="/app" element={<Navigate to="/trips" replace />} />

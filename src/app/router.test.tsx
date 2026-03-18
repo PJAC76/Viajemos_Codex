@@ -8,7 +8,7 @@ describe("AppShell", () => {
   it("renders the primary app brand", () => {
     render(
       <SessionProvider>
-        <MemoryRouter initialEntries={["/trips"]}>
+        <MemoryRouter initialEntries={["/trips"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppShell />
         </MemoryRouter>
       </SessionProvider>
@@ -20,7 +20,7 @@ describe("AppShell", () => {
   it("shows the main navigation destinations", () => {
     render(
       <SessionProvider>
-        <MemoryRouter initialEntries={["/trips"]}>
+        <MemoryRouter initialEntries={["/trips"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppShell />
         </MemoryRouter>
       </SessionProvider>
