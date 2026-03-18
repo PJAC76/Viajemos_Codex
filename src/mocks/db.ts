@@ -1,5 +1,5 @@
 import type { AuthUser } from "../modules/auth/domain/types";
-import type { Expense, ExpenseCategory } from "../modules/expenses/domain/types";
+import type { Expense, ExpenseCategory, Settlement } from "../modules/expenses/domain/types";
 import type { ItineraryDay, ItineraryItem, RouteSnapshot } from "../modules/itinerary/domain/types";
 import type { Place, Reservation } from "../modules/places/domain/types";
 import type { Trip, TripInvitation, TripMember } from "../modules/trips/domain/types";
@@ -25,6 +25,7 @@ export const trips: Trip[] = [
     endDate: "2026-10-25",
     currency: "EUR",
     status: "active",
+    settlementStatus: "open",
     createdBy: mockUser.id
   }
 ];
@@ -294,6 +295,23 @@ export const expenses: Expense[] = [
       { id: "split-7", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-javier", amount: 21, status: "pending" },
       { id: "split-8", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-lucia", amount: 21, status: "pending" }
     ]
+  }
+];
+
+export const settlements: Settlement[] = [
+  {
+    id: "settlement-history-1",
+    tripId: "trip-tokyo",
+    fromUserId: "user-elena",
+    fromName: "Elena Martinez",
+    toUserId: "user-alex",
+    toName: "Alex Garcia",
+    amount: 21,
+    status: "settled",
+    reason: "Taxi aeropuerto ya compensado",
+    currency: "EUR",
+    settledAt: "2026-10-16T10:00:00.000Z",
+    settledBy: "user-elena"
   }
 ];
 

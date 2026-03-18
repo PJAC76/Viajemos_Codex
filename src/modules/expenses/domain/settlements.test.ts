@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSettlements } from "./settlements";
-import type { Expense } from "./types";
+import type { Expense, Settlement } from "./types";
 
 describe("buildSettlements", () => {
   it("produces net balances from shared expenses", () => {
@@ -56,5 +56,50 @@ describe("buildSettlements", () => {
     expect(settlements).toHaveLength(1);
     expect(settlements[0].fromName).toBe("Elena");
     expect(settlements[0].amount).toBe(50);
+  });
+
+  it("discounts balances that were already marked as settled", () => {
+    const expenses: Expense[] = [
+      {
+        id: "3",
+        tripId: "trip",
+        concept: "Hotel",
+        categoryId: "stay",
+        amount: 90,
+        paidBy: "alex",
+        paidByName: "Alex",
+        date: "2026-10-12T20:00:00.000Z",
+        splitBetween: ["alex", "elena", "lucia"]
+      }
+    ];
+
+    const settledHistory: Settlement[] = [
+      {
+        id: "st-1",
+        tripId: "trip",
+        fromUserId: "elena",
+        fromName: "Elena",
+        toUserId: "alex",
+        toName: "Alex",
+        amount: 30,
+        status: "settled",
+        reason: "Pago recibido"
+      }
+    ];
+
+    const settlements = buildSettlements(
+      expenses,
+      {
+        alex: "Alex",
+        elena: "Elena",
+        lucia: "Lucia"
+      },
+      settledHistory
+    );
+
+    expect(settlements).toHaveLength(1);
+    expect(settlements[0].fromName).toBe("Lucia");
+    expect(settlements[0].toName).toBe("Alex");
+    expect(settlements[0].amount).toBe(30);
   });
 });

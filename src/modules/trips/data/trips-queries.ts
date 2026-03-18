@@ -18,6 +18,9 @@ function normalizeTrip(row: Record<string, unknown>): Trip {
     currency: "EUR",
     status:
       row.status === "draft" || row.status === "closed" || row.status === "active" ? row.status : "draft",
+    settlementStatus: row.settlement_status === "closed" ? "closed" : "open",
+    settlementClosedAt: typeof row.settlement_closed_at === "string" ? row.settlement_closed_at : undefined,
+    settlementClosedBy: typeof row.settlement_closed_by === "string" ? row.settlement_closed_by : undefined,
     createdBy: typeof row.created_by === "string" ? row.created_by : "",
     createdAt: typeof row.created_at === "string" ? row.created_at : undefined,
     updatedAt: typeof row.updated_at === "string" ? row.updated_at : undefined

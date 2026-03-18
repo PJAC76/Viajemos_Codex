@@ -5,12 +5,13 @@ import { ErrorState } from "../../../components/states/error-state";
 import { ExpenseTable } from "../../../components/trips/expense-table";
 import { SectionHeader } from "../../../components/trips/section-header";
 import { StatCard } from "../../../components/trips/stat-card";
+import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { formatCurrency } from "../../../lib/utils";
 import { useSession } from "../../../app/providers/session-provider";
-import { useTripMembers, useTripPermission } from "../../trips/data/use-trips-data";
+import { useTripMembers, useTripOverview, useTripPermission } from "../../trips/data/use-trips-data";
 import { useExpenses } from "../data/use-expenses-data";
 import { buildSettlements } from "../domain/settlements";
 import type { Expense, ExpenseUpsertInput } from "../domain/types";
@@ -49,6 +50,7 @@ function downloadExpensesCsv(expenses: Expense[]) {
 export function ExpensesScreen() {
   const { tripId } = useParams();
   const { user } = useSession();
+  const { trip, loading: tripLoading } = useTripOverview(tripId);
   const { members, loading: membersLoading } = useTripMembers(tripId);
   const { isAdmin } = useTripPermission(tripId);
   const userNames = useMemo(
@@ -109,6 +111,8 @@ export function ExpensesScreen() {
     }
   }, [activeMembers, showForm, user?.id]);
 
+  const isSettlementClosed = trip?.settlementStatus === "closed";
+
   const filteredExpenses = useMemo(() => {
     return expenses.filter((expense) => {
       const matchesCategory = categoryFilter === "all" || expense.categoryId === categoryFilter;
@@ -144,6 +148,11 @@ export function ExpensesScreen() {
   }
 
   function startCreateFlow() {
+    if (isSettlementClosed) {
+      setActionError("La liquidacion del viaje ya esta cerrada. No se pueden anadir mas gastos.");
+      return;
+    }
+
     setActionError(null);
     setEditingExpenseId(null);
     setReceiptFile(null);
@@ -160,6 +169,11 @@ export function ExpensesScreen() {
   }
 
   function startEditFlow(expense: Expense) {
+    if (isSettlementClosed) {
+      setActionError("La liquidacion del viaje ya esta cerrada. No se pueden editar gastos.");
+      return;
+    }
+
     setActionError(null);
     setEditingExpenseId(expense.id);
     setReceiptFile(null);
@@ -189,6 +203,11 @@ export function ExpensesScreen() {
   }
 
   async function handleSaveExpense() {
+    if (isSettlementClosed) {
+      setActionError("La liquidacion del viaje ya esta cerrada. No se pueden guardar cambios economicos.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       setActionError(null);
@@ -216,6 +235,11 @@ export function ExpensesScreen() {
   }
 
   async function handleDeleteExpense(expenseId: string) {
+    if (isSettlementClosed) {
+      setActionError("La liquidacion del viaje ya esta cerrada. No se pueden borrar gastos.");
+      return;
+    }
+
     try {
       setActionError(null);
       await deleteExpense(expenseId);
@@ -224,7 +248,7 @@ export function ExpensesScreen() {
     }
   }
 
-  if (loading || membersLoading) {
+  if (loading || membersLoading || tripLoading) {
     return <div className="flex min-h-[40vh] items-center justify-center text-sm text-slate-500">Cargando gastos...</div>;
   }
 
@@ -237,8 +261,28 @@ export function ExpensesScreen() {
       <SectionHeader
         title="Gastos del viaje"
         description="Alta real con reparto entre participantes, ticket adjunto y exportacion basica para el MVP."
-        action={<Button onClick={startCreateFlow}>{showForm ? "Nuevo gasto" : "Anadir gasto"}</Button>}
+        action={
+          <Button onClick={startCreateFlow} disabled={isSettlementClosed}>
+            {showForm ? "Nuevo gasto" : "Anadir gasto"}
+          </Button>
+        }
       />
+
+      {isSettlementClosed ? (
+        <Card className="border-primary/20 bg-primary/5 p-5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">Gastos bloqueados por cierre final</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                La liquidacion del viaje ya esta cerrada, asi que el historial economico queda congelado.
+              </p>
+            </div>
+            <Badge className="w-fit bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+              Cerrado
+            </Badge>
+          </div>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Total gastado" value={formatCurrency(totalAmount)} icon="payments" />
@@ -258,7 +302,7 @@ export function ExpensesScreen() {
 
       {actionError ? <p className="text-sm font-medium text-rose-600">{actionError}</p> : null}
 
-      {showForm ? (
+      {showForm && !isSettlementClosed ? (
         <Card className="p-6">
           <SectionHeader
             title={editingExpenseId ? "Editar gasto" : "Nuevo gasto"}
@@ -457,10 +501,10 @@ export function ExpensesScreen() {
                         </div>
                         {canEdit ? (
                           <div className="flex flex-wrap gap-2">
-                            <Button variant="secondary" onClick={() => startEditFlow(expense)}>
+                            <Button variant="secondary" onClick={() => startEditFlow(expense)} disabled={isSettlementClosed}>
                               Editar
                             </Button>
-                            <Button variant="ghost" onClick={() => void handleDeleteExpense(expense.id)}>
+                            <Button variant="ghost" onClick={() => void handleDeleteExpense(expense.id)} disabled={isSettlementClosed}>
                               Borrar
                             </Button>
                           </div>

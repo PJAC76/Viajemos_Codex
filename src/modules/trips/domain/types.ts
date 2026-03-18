@@ -1,5 +1,6 @@
 export type TripRole = "admin" | "member";
 export type TripStatus = "draft" | "active" | "closed";
+export type TripSettlementStatus = "open" | "closed";
 
 export interface Trip {
   id: string;
@@ -11,6 +12,9 @@ export interface Trip {
   endDate: string;
   currency: "EUR";
   status: TripStatus;
+  settlementStatus: TripSettlementStatus;
+  settlementClosedAt?: string;
+  settlementClosedBy?: string;
   createdBy: string;
   createdAt?: string;
   updatedAt?: string;

@@ -26,6 +26,18 @@ function sanitizeFileName(fileName: string) {
   return fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
 }
 
+function toExpenseActionError(message: string | undefined, fallback: string) {
+  if (!message) {
+    return fallback;
+  }
+
+  if (message.includes("SETTLEMENTS_ALREADY_CLOSED")) {
+    return "La liquidacion del viaje ya esta cerrada y no admite mas cambios economicos.";
+  }
+
+  return message;
+}
+
 function normalizeExpenseCategory(row: Record<string, unknown>): ExpenseCategory {
   return {
     id: String(row.id),
@@ -278,7 +290,7 @@ export const expensesQueries = {
     });
 
     if (error) {
-      throw new Error(error.message ?? "No se pudo guardar el gasto.");
+      throw new Error(toExpenseActionError(error.message, "No se pudo guardar el gasto."));
     }
 
     const expenseId = Array.isArray(data) ? (data[0] as string | undefined) : (data as string | null);
@@ -328,7 +340,7 @@ export const expensesQueries = {
     });
 
     if (error) {
-      throw new Error(error.message ?? "No se pudo actualizar el gasto.");
+      throw new Error(toExpenseActionError(error.message, "No se pudo actualizar el gasto."));
     }
 
     const updatedExpenseId = Array.isArray(data) ? (data[0] as string | undefined) : (data as string | null);
@@ -362,7 +374,7 @@ export const expensesQueries = {
       .maybeSingle();
 
     if (receiptResult.error) {
-      throw new Error(receiptResult.error.message ?? "No se pudo revisar el ticket del gasto.");
+      throw new Error(toExpenseActionError(receiptResult.error.message, "No se pudo revisar el ticket del gasto."));
     }
 
     const storageKey =
@@ -377,7 +389,7 @@ export const expensesQueries = {
     const { error } = await insforge.database.from("expenses").delete().eq("id", expenseId).eq("trip_id", tripId);
 
     if (error) {
-      throw new Error(error.message ?? "No se pudo borrar el gasto.");
+      throw new Error(toExpenseActionError(error.message, "No se pudo borrar el gasto."));
     }
   }
 };

@@ -57,12 +57,21 @@ export interface ExpenseUpsertInput {
   description?: string;
 }
 
+export type SettlementStatus = "pending" | "settled";
+
 export interface Settlement {
+  id?: string;
+  tripId?: string;
   fromUserId: string;
   fromName: string;
   toUserId: string;
   toName: string;
   amount: number;
-  status: "pending" | "settled";
+  status: SettlementStatus;
   reason: string;
+  currency?: "EUR";
+  createdAt?: string;
+  updatedAt?: string;
+  settledAt?: string;
+  settledBy?: string;
 }

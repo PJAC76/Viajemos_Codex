@@ -1,6 +1,10 @@
 import type { Expense, Settlement } from "./types";
 
-export function buildSettlements(expenses: Expense[], userNames: Record<string, string>): Settlement[] {
+export function buildSettlements(
+  expenses: Expense[],
+  userNames: Record<string, string>,
+  settledHistory: Settlement[] = []
+): Settlement[] {
   const balances = new Map<string, number>();
 
   for (const expense of expenses) {
@@ -24,6 +28,15 @@ export function buildSettlements(expenses: Expense[], userNames: Record<string, 
     }
   }
 
+  for (const settlement of settledHistory) {
+    if (settlement.status !== "settled") {
+      continue;
+    }
+
+    balances.set(settlement.fromUserId, (balances.get(settlement.fromUserId) ?? 0) + settlement.amount);
+    balances.set(settlement.toUserId, (balances.get(settlement.toUserId) ?? 0) - settlement.amount);
+  }
+
   const creditors = [...balances.entries()]
     .filter(([, balance]) => balance > 0.01)
     .map(([userId, balance]) => ({ userId, balance }));
@@ -41,13 +54,15 @@ export function buildSettlements(expenses: Expense[], userNames: Record<string, 
     const amount = Number(Math.min(creditor.balance, debtor.balance).toFixed(2));
 
     settlements.push({
+      tripId: expenses[0]?.tripId,
       fromUserId: debtor.userId,
       fromName: userNames[debtor.userId] ?? debtor.userId,
       toUserId: creditor.userId,
       toName: userNames[creditor.userId] ?? creditor.userId,
       amount,
       status: "pending",
-      reason: "Balance neto del viaje"
+      reason: "Balance neto del viaje",
+      currency: "EUR"
     });
 
     creditor.balance -= amount;
