@@ -99,7 +99,9 @@ export const places: Place[] = [
     phone: "+81 03 1234 5678",
     website: "https://example.com/hotel",
     notes: "Check-in con vista a Shibuya Crossing.",
-    favorite: true
+    createdBy: mockUser.id,
+    favorite: true,
+    favoriteCount: 2
   },
   {
     id: "place-restaurant",
@@ -113,7 +115,9 @@ export const places: Place[] = [
     phone: "+81 03 9876 5432",
     website: "https://example.com/jiro",
     notes: "Cena especial del viaje.",
-    favorite: true
+    createdBy: "user-elena",
+    favorite: true,
+    favoriteCount: 3
   },
   {
     id: "place-sensoji",
@@ -125,7 +129,9 @@ export const places: Place[] = [
     image:
       "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=900&q=80",
     notes: "Primera parada cultural.",
-    favorite: false
+    createdBy: "user-javier",
+    favorite: false,
+    favoriteCount: 0
   }
 ];
 

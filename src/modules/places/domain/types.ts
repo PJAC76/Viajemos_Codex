@@ -6,13 +6,31 @@ export interface Place {
   type: PlaceType;
   name: string;
   address: string;
-  rating: number;
-  image: string;
+  rating?: number;
+  image?: string;
+  latitude?: number;
+  longitude?: number;
   phone?: string;
   email?: string;
   website?: string;
   notes?: string;
+  createdBy: string;
   favorite: boolean;
+  favoriteCount: number;
+}
+
+export interface PlaceUpsertInput {
+  type: PlaceType;
+  name: string;
+  address: string;
+  rating?: number;
+  image?: string;
+  latitude?: number;
+  longitude?: number;
+  phone?: string;
+  email?: string;
+  website?: string;
+  notes?: string;
 }
 
 export interface Reservation {
