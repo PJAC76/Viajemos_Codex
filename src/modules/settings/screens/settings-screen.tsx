@@ -12,7 +12,7 @@ export function SettingsScreen() {
         </Card>
         <Card className="p-5">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Integraciones</h3>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Supabase y Google Maps quedan conectados por adaptadores desacoplados.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">InsForge y Google Maps quedan conectados por adaptadores desacoplados.</p>
         </Card>
       </div>
     </div>

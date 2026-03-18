@@ -7,7 +7,7 @@ import { Button } from "../../../components/ui/button";
 export function MessagesScreen() {
   return (
     <div className="space-y-8">
-      <SectionHeader title="Mensajes" description="Canal de comunicacion del viaje, preparado para realtime en Supabase." />
+      <SectionHeader title="Mensajes" description="Canal de comunicacion del viaje, preparado para realtime en InsForge." />
       <Card className="p-5">
         <div className="space-y-4">
           {messages.map((message) => (

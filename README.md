@@ -11,7 +11,7 @@ La base del proyecto ya incluye:
 - `App Shell` responsive para desktop y mobile
 - rutas principales del MVP
 - mocks de dominio para avanzar UI sin depender del backend
-- adaptadores base para `Supabase`, `Google Maps`, storage y notificaciones
+- adaptadores base para `InsForge`, `Google Maps`, storage y notificaciones
 - `PWA` inicial con `manifest` y `service worker`
 - primeras vistas inspiradas en los disenos Stitch para:
   - resumen del viaje
@@ -32,7 +32,7 @@ La base del proyecto ya incluye:
 - `Vite`
 - `Tailwind CSS`
 - `Vitest`
-- `Supabase JS`
+- `InsForge SDK`
 
 ## Estructura
 
@@ -40,7 +40,7 @@ La base del proyecto ya incluye:
 src/
   app/                  # router, layouts, providers, guards
   components/           # UI compartida y bloques reutilizables
-  lib/                  # utilidades, env, feature flags, supabase, pwa
+  lib/                  # utilidades, env, feature flags, insforge, pwa
   mocks/                # datos mock por dominio
   modules/              # dominios funcionales
   services/             # adaptadores desacoplados
@@ -63,8 +63,8 @@ npm test
 Usa `.env.example` como referencia:
 
 ```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_INSFORGE_BASE_URL=
+VITE_INSFORGE_ANON_KEY=
 VITE_GOOGLE_MAPS_API_KEY=
 ```
 

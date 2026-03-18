@@ -13,7 +13,7 @@ export function AuthLayout({ children }: PropsWithChildren) {
             </p>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <p className="text-sm text-white/70">Preparado para PWA, Supabase, Google Maps y crecimiento por modulos.</p>
+            <p className="text-sm text-white/70">Preparado para PWA, InsForge, Google Maps y crecimiento por modulos.</p>
           </div>
         </div>
         <div className="flex items-center justify-center p-6 md:p-12">{children}</div>

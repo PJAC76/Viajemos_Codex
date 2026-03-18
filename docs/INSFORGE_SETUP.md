@@ -5,7 +5,7 @@ Esta guia deja documentado el flujo recomendado para conectar y mantener `InsFor
 ## Que usamos en este proyecto
 
 - `InsForge MCP` para infraestructura y administracion del backend
-- `SDK` de InsForge en la aplicacion cuando migremos el cliente desde Supabase
+- `SDK` de InsForge en la aplicacion para sustituir Supabase y centralizar auth, db y storage
 - `CLI` de conexion via `npx @insforge/install` para registrar o rotar la conexion de MCP
 
 ## Conexion inicial o reconexion
