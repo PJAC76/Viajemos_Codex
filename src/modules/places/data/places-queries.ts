@@ -1,8 +1,8 @@
-import { places, reservations, trips } from "../../../mocks/db";
+import { places, trips } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
 import { tripsQueries } from "../../trips/data/trips-queries";
 import type { Trip } from "../../trips/domain/types";
-import type { Place, PlaceUpsertInput, Reservation } from "../domain/types";
+import type { Place, PlaceUpsertInput } from "../domain/types";
 
 const fallbackPlaceImage =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
@@ -314,9 +314,5 @@ export const placesQueries = {
     if (error) {
       throw new Error(error.message ?? "No se pudo marcar como favorito.");
     }
-  },
-
-  listReservations(tripId: string): Reservation[] {
-    return reservations.filter((reservation) => reservation.tripId === tripId);
   }
 };

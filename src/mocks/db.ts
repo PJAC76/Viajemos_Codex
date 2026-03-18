@@ -147,7 +147,15 @@ export const reservations: Reservation[] = [
     endAt: "2026-10-25T11:00:00.000Z",
     status: "confirmed",
     partySize: 4,
-    notes: "Dos habitaciones dobles."
+    roomOrTableCount: 2,
+    amount: 1840,
+    currency: "EUR",
+    cancellationPolicy: "Cancelacion gratuita hasta 72 horas antes de la llegada.",
+    phone: "+81 03 1234 5678",
+    email: "booking@shibuyaskyhotel.jp",
+    bookingUrl: "https://example.com/hotel-booking",
+    notes: "Dos habitaciones dobles.",
+    createdBy: mockUser.id
   },
   {
     id: "reservation-dinner",
@@ -159,7 +167,15 @@ export const reservations: Reservation[] = [
     startAt: "2026-10-18T19:30:00.000Z",
     status: "confirmed",
     partySize: 4,
-    notes: "Menu degustacion."
+    roomOrTableCount: 1,
+    amount: 320,
+    currency: "EUR",
+    cancellationPolicy: "Cancelacion hasta 24 horas antes.",
+    phone: "+81 03 9876 5432",
+    email: "reservas@jiro.jp",
+    bookingUrl: "https://example.com/jiro-booking",
+    notes: "Menu degustacion.",
+    createdBy: mockUser.id
   }
 ];
 
