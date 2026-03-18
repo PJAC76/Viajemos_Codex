@@ -68,6 +68,22 @@ VITE_SUPABASE_ANON_KEY=
 VITE_GOOGLE_MAPS_API_KEY=
 ```
 
+## InsForge
+
+La conectividad con `InsForge` queda documentada en [docs/INSFORGE_SETUP.md](/C:/GPT_CODEX/Viajemos/docs/INSFORGE_SETUP.md).
+
+Comandos utiles:
+
+```bash
+npm run insforge:connect -- -ApiKey <INSFORGE_API_KEY> -ApiBaseUrl <INSFORGE_BASE_URL>
+npm run insforge:status
+```
+
+Notas:
+
+- No se versionan claves activas.
+- Si rotas la `API key`, vuelve a ejecutar `insforge:connect`, reinicia `Codex` y luego revoca la clave antigua.
+
 ## Roadmap modular
 
 1. `M0 Plataforma`
@@ -89,4 +105,3 @@ VITE_GOOGLE_MAPS_API_KEY=
 
 - `npm run build` OK
 - `npm test` OK
-

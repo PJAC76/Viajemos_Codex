@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "insforge:connect": "powershell -ExecutionPolicy Bypass -File ./scripts/insforge-connect.ps1",
+    "insforge:status": "powershell -ExecutionPolicy Bypass -File ./scripts/insforge-status.ps1"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
