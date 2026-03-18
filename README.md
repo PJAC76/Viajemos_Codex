@@ -13,6 +13,7 @@ La base del proyecto ya incluye:
 - mocks de dominio para avanzar UI sin depender del backend
 - adaptadores base para `InsForge`, `Google Maps`, storage y notificaciones
 - `PWA` inicial con `manifest` y `service worker`
+- auth con `email/password`, `Google OAuth`, verificacion por codigo y reset por codigo
 - primeras vistas inspiradas en los disenos Stitch para:
   - resumen del viaje
   - sitios y favoritos
@@ -105,3 +106,4 @@ Notas:
 
 - `npm run build` OK
 - `npm test` OK
+- `GitHub Actions` preparado para `build + test`

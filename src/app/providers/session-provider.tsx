@@ -11,7 +11,10 @@ interface SessionContextValue {
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<void>;
   signUp: (payload: { email: string; password: string; name?: string }) => Promise<{ requiresEmailVerification: boolean }>;
   signInWithGoogle: (redirectPath?: string) => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
+  verifyEmailCode: (payload: { email: string; otp: string }) => Promise<void>;
   sendResetPasswordEmail: (email: string) => Promise<void>;
+  resetPasswordWithCode: (payload: { email: string; code: string; newPassword: string }) => Promise<void>;
   signInDemo: () => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<void>;
   refreshCurrentUser: () => Promise<void>;
@@ -79,9 +82,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           setUser(signedUser);
         }
       },
+      async resendVerificationEmail(email) {
+        await authClient.resendVerificationEmail(email);
+        setAuthMessage("Te hemos reenviado un nuevo codigo de verificacion.");
+      },
+      async verifyEmailCode(payload) {
+        const verifiedUser = await profileClient.ensureCurrentProfile(await authClient.verifyEmailCode(payload));
+        setUser(verifiedUser);
+        setAuthMessage("Email verificado correctamente.");
+      },
       async sendResetPasswordEmail(email) {
         await authClient.sendResetPasswordEmail(email);
-        setAuthMessage("Te hemos enviado las instrucciones de recuperacion.");
+        setAuthMessage("Te hemos enviado un codigo para recuperar la contrasena.");
+      },
+      async resetPasswordWithCode(payload) {
+        const token = await authClient.exchangeResetPasswordToken({
+          email: payload.email,
+          code: payload.code
+        });
+        await authClient.resetPassword({
+          otp: token,
+          newPassword: payload.newPassword
+        });
+        setAuthMessage("Contrasena actualizada. Ya puedes iniciar sesion.");
       },
       async signInDemo() {
         const signedUser = await profileClient.ensureCurrentProfile(await authClient.signInDemo());

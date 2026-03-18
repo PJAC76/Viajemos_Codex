@@ -6,6 +6,7 @@ import { useUserSettings } from "../modules/settings/data/use-user-settings";
 import { RecoverScreen } from "../modules/auth/screens/recover-screen";
 import { LoginScreen } from "../modules/auth/screens/login-screen";
 import { RegisterScreen } from "../modules/auth/screens/register-screen";
+import { VerifyScreen } from "../modules/auth/screens/verify-screen";
 import { DocumentsScreen } from "../modules/documents/screens/documents-screen";
 import { ExploreScreen } from "../modules/explore/screens/explore-screen";
 import { FavoritesScreen } from "../modules/favorites/screens/favorites-screen";
@@ -60,6 +61,7 @@ export function AppRouter() {
 
         <Route path="/auth/login" element={<LoginScreen />} />
         <Route path="/auth/register" element={<RegisterScreen />} />
+        <Route path="/auth/verify" element={<VerifyScreen />} />
         <Route path="/auth/recover" element={<RecoverScreen />} />
         <Route path="/invite/:token" element={<AcceptInvitationScreen />} />
 

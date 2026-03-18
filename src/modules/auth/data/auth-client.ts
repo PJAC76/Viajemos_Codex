@@ -114,6 +114,39 @@ export const authClient = {
     };
   },
 
+  async resendVerificationEmail(email: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return;
+    }
+
+    const { error } = await insforge.auth.resendVerificationEmail({ email });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo reenviar el codigo de verificacion.");
+    }
+  },
+
+  async verifyEmailCode({ email, otp }: { email: string; otp: string }): Promise<AuthUser> {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return {
+        ...mockUser,
+        email
+      };
+    }
+
+    const { data, error } = await insforge.auth.verifyEmail({ email, otp });
+
+    if (error || !data?.user) {
+      throw new Error(error?.message ?? "No se pudo verificar el codigo.");
+    }
+
+    return normalizeAuthUser(data.user);
+  },
+
   async sendResetPasswordEmail(email: string) {
     const insforge = getInsforgeClient();
 
@@ -125,6 +158,36 @@ export const authClient = {
 
     if (error) {
       throw new Error(error.message ?? "No se pudo enviar el correo de recuperacion.");
+    }
+  },
+
+  async exchangeResetPasswordToken({ email, code }: { email: string; code: string }) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return "demo-reset-token";
+    }
+
+    const { data, error } = await insforge.auth.exchangeResetPasswordToken({ email, code });
+
+    if (error || !data?.token) {
+      throw new Error(error?.message ?? "No se pudo validar el codigo de recuperacion.");
+    }
+
+    return data.token;
+  },
+
+  async resetPassword({ otp, newPassword }: { otp: string; newPassword: string }) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return;
+    }
+
+    const { error } = await insforge.auth.resetPassword({ otp, newPassword });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo actualizar la contrasena.");
     }
   },
 

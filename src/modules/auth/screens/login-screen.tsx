@@ -35,7 +35,7 @@ export function LoginScreen() {
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary">Acceso</p>
         <h1 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">Entra en tu proximo viaje</h1>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          Base lista para email/password, Google OAuth y session provider con InsForge.
+          Accede con email o Google. Si tu cuenta aun no esta verificada, podras confirmarla por codigo.
         </p>
         <div className="mt-8 space-y-4">
           <Input placeholder="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
