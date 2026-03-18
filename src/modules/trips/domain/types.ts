@@ -39,6 +39,23 @@ export interface TripInvitation {
   createdAt?: string;
 }
 
+export interface TripInvitationPreview {
+  id: string;
+  tripId: string;
+  tripTitle: string;
+  destination: string;
+  coverImage?: string;
+  startDate: string;
+  endDate: string;
+  email: string;
+  status: "pending" | "accepted" | "expired" | "revoked";
+  invitedBy: string;
+  invitedByName: string;
+  shareUrl?: string;
+  viewerEmail?: string;
+  viewerMatchesEmail: boolean;
+}
+
 export interface TripUpsertInput {
   title: string;
   destination: string;

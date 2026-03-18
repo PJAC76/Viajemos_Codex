@@ -10,7 +10,7 @@ interface SessionContextValue {
   authMessage: string | null;
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<void>;
   signUp: (payload: { email: string; password: string; name?: string }) => Promise<{ requiresEmailVerification: boolean }>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (redirectPath?: string) => Promise<void>;
   sendResetPasswordEmail: (email: string) => Promise<void>;
   signInDemo: () => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<void>;
@@ -72,8 +72,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
         return { requiresEmailVerification: result.requiresEmailVerification };
       },
-      async signInWithGoogle() {
-        const signedUser = await authClient.signInWithGoogle();
+      async signInWithGoogle(redirectPath) {
+        const signedUser = await authClient.signInWithGoogle(redirectPath);
 
         if (signedUser) {
           setUser(signedUser);

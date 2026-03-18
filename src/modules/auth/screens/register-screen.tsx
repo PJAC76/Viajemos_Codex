@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../../app/layouts/auth-layout";
 import { useSession } from "../../../app/providers/session-provider";
 import { Button } from "../../../components/ui/button";
@@ -8,7 +8,9 @@ import { Input } from "../../../components/ui/input";
 
 export function RegisterScreen() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { authMessage, signUp } = useSession();
+  const inviteToken = searchParams.get("invite");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ export function RegisterScreen() {
       const result = await signUp({ name, email, password });
 
       if (!result.requiresEmailVerification) {
-        navigate("/trips");
+        navigate(inviteToken ? `/invite/${inviteToken}` : "/trips");
       }
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : "No se pudo crear la cuenta.");
@@ -53,7 +55,10 @@ export function RegisterScreen() {
         </div>
         <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
           Ya tienes cuenta?{" "}
-          <Link to="/auth/login" className="font-semibold text-primary">
+          <Link
+            to={inviteToken ? `/auth/login?invite=${encodeURIComponent(inviteToken)}` : "/auth/login"}
+            className="font-semibold text-primary"
+          >
             Iniciar sesion
           </Link>
         </p>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../../app/layouts/auth-layout";
 import { useSession } from "../../../app/providers/session-provider";
 import { Button } from "../../../components/ui/button";
@@ -8,7 +8,9 @@ import { Input } from "../../../components/ui/input";
 
 export function LoginScreen() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { authMessage, signInDemo, signInWithGoogle, signInWithPassword } = useSession();
+  const inviteToken = searchParams.get("invite");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export function LoginScreen() {
       setSubmitting(true);
       setError(null);
       await signInWithPassword({ email, password });
-      navigate("/trips");
+      navigate(inviteToken ? `/invite/${inviteToken}` : "/trips");
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : "No se pudo iniciar sesion.");
     } finally {
@@ -52,12 +54,16 @@ export function LoginScreen() {
             variant="secondary"
             fullWidth
             onClick={() => {
-              void signInDemo().then(() => navigate("/trips"));
+              void signInDemo().then(() => navigate(inviteToken ? `/invite/${inviteToken}` : "/trips"));
             }}
           >
             Entrar con demo
           </Button>
-          <Button variant="secondary" fullWidth onClick={() => void signInWithGoogle()}>
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => void signInWithGoogle(inviteToken ? `/invite/${inviteToken}` : "/trips")}
+          >
             Continuar con Google
           </Button>
         </div>
@@ -65,7 +71,10 @@ export function LoginScreen() {
           <Link to="/auth/recover" className="font-semibold text-primary">
             Recuperar acceso
           </Link>
-          <Link to="/auth/register" className="font-semibold text-slate-600 dark:text-slate-300">
+          <Link
+            to={inviteToken ? `/auth/register?invite=${encodeURIComponent(inviteToken)}` : "/auth/register"}
+            className="font-semibold text-slate-600 dark:text-slate-300"
+          >
             Crear cuenta
           </Link>
         </div>

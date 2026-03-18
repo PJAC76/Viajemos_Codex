@@ -1,7 +1,7 @@
 import { tripInvitations, tripMembers, trips } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
 import type { AuthUser } from "../../auth/domain/types";
-import type { Trip, TripInvitation, TripMember, TripUpsertInput } from "../domain/types";
+import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripUpsertInput } from "../domain/types";
 
 const fallbackCoverImage =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80";
@@ -59,6 +59,78 @@ function normalizeTripInvitation(row: Record<string, unknown>): TripInvitation {
     token: typeof row.token === "string" ? row.token : undefined,
     createdAt: typeof row.created_at === "string" ? row.created_at : undefined
   };
+}
+
+function normalizeInvitationStatus(value: unknown): TripInvitation["status"] {
+  return value === "accepted" || value === "expired" || value === "revoked" || value === "pending" ? value : "pending";
+}
+
+function normalizeTripInvitationPreview(row: Record<string, unknown>): TripInvitationPreview {
+  return {
+    id: String(row.id),
+    tripId: String(row.trip_id),
+    tripTitle: typeof row.trip_title === "string" ? row.trip_title : "Viaje privado",
+    destination: typeof row.trip_destination === "string" ? row.trip_destination : "Destino pendiente",
+    coverImage: typeof row.trip_cover_image === "string" ? row.trip_cover_image : undefined,
+    startDate: typeof row.trip_start_date === "string" ? row.trip_start_date : "",
+    endDate: typeof row.trip_end_date === "string" ? row.trip_end_date : "",
+    email: typeof row.email === "string" ? row.email : "",
+    status: normalizeInvitationStatus(row.status),
+    invitedBy: typeof row.invited_by === "string" ? row.invited_by : "",
+    invitedByName: typeof row.invited_by_name === "string" ? row.invited_by_name : "Admin del viaje",
+    shareUrl: typeof row.share_url === "string" ? row.share_url : undefined,
+    viewerEmail: typeof row.viewer_email === "string" ? row.viewer_email : undefined,
+    viewerMatchesEmail: Boolean(row.viewer_matches_email)
+  };
+}
+
+function buildInvitationShareUrl(token: string) {
+  if (typeof window === "undefined") {
+    return `https://viajemos.app/invite/${token}`;
+  }
+
+  return `${window.location.origin}/invite/${token}`;
+}
+
+function buildInvitationToken() {
+  return `${crypto.randomUUID().replace(/-/g, "")}${crypto.randomUUID().replace(/-/g, "")}`;
+}
+
+function getInvitationPreviewFallback(token: string) {
+  const invitation = tripInvitations.find((item) => item.token === token || item.shareUrl?.endsWith(`/${token}`));
+  const trip = invitation ? trips.find((item) => item.id === invitation.tripId) : null;
+
+  if (!invitation || !trip) {
+    return null;
+  }
+
+  return {
+    id: invitation.id,
+    tripId: trip.id,
+    tripTitle: trip.title,
+    destination: trip.destination,
+    coverImage: trip.coverImage,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    email: invitation.email,
+    status: invitation.status,
+    invitedBy: invitation.invitedBy,
+    invitedByName: tripMembers.find((member) => member.userId === invitation.invitedBy)?.displayName ?? "Admin del viaje",
+    shareUrl: invitation.shareUrl,
+    viewerMatchesEmail: false
+  } satisfies TripInvitationPreview;
+}
+
+function normalizeRpcRows(data: unknown) {
+  if (Array.isArray(data)) {
+    return data as Array<Record<string, unknown>>;
+  }
+
+  if (data && typeof data === "object") {
+    return [data as Record<string, unknown>];
+  }
+
+  return [];
 }
 
 async function loadProfilesMap(userIds: string[]) {
@@ -171,13 +243,14 @@ export const tripsQueries = {
     const insforge = getInsforgeClient();
 
     if (!insforge) {
-      return tripInvitations.filter((invitation) => invitation.tripId === tripId);
+      return tripInvitations.filter((invitation) => invitation.tripId === tripId && invitation.status === "pending");
     }
 
     const { data, error } = await insforge.database
       .from("trip_invitations")
       .select("*")
       .eq("trip_id", tripId)
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -185,6 +258,165 @@ export const tripsQueries = {
     }
 
     return ((data as Array<Record<string, unknown>> | null) ?? []).map(normalizeTripInvitation);
+  },
+
+  async createInvitation(tripId: string, invitedBy: string, email: string) {
+    const cleanEmail = email.trim().toLowerCase();
+    const token = buildInvitationToken();
+    const shareUrl = buildInvitationShareUrl(token);
+    const insforge = getInsforgeClient();
+
+    if (!cleanEmail) {
+      throw new Error("Escribe el email de la persona a la que quieres invitar.");
+    }
+
+    if (!insforge) {
+      const invitation: TripInvitation = {
+        id: `invite-${crypto.randomUUID()}`,
+        tripId,
+        email: cleanEmail,
+        status: "pending",
+        invitedBy,
+        token,
+        shareUrl,
+        createdAt: new Date().toISOString()
+      };
+
+      tripInvitations.unshift(invitation);
+      return invitation;
+    }
+
+    const revokeExistingResult = await insforge.database
+      .from("trip_invitations")
+      .update({
+        status: "revoked",
+        revoked_at: new Date().toISOString()
+      })
+      .eq("trip_id", tripId)
+      .eq("email", cleanEmail)
+      .eq("status", "pending");
+
+    if (revokeExistingResult.error) {
+      throw new Error(revokeExistingResult.error.message ?? "No se pudo preparar la nueva invitacion.");
+    }
+
+    const { data, error } = await insforge.database
+      .from("trip_invitations")
+      .insert([
+        {
+          trip_id: tripId,
+          email: cleanEmail,
+          token,
+          status: "pending",
+          invited_by: invitedBy,
+          share_url: shareUrl
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo crear la invitacion.");
+    }
+
+    return normalizeTripInvitation(data as Record<string, unknown>);
+  },
+
+  async revokeInvitation(invitationId: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      const invitation = tripInvitations.find((item) => item.id === invitationId);
+
+      if (invitation) {
+        invitation.status = "revoked";
+      }
+
+      return;
+    }
+
+    const { error } = await insforge.database
+      .from("trip_invitations")
+      .update({
+        status: "revoked",
+        revoked_at: new Date().toISOString()
+      })
+      .eq("id", invitationId);
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo revocar la invitacion.");
+    }
+  },
+
+  async removeMember(memberId: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      const memberIndex = tripMembers.findIndex((item) => item.id === memberId);
+
+      if (memberIndex >= 0) {
+        tripMembers.splice(memberIndex, 1);
+      }
+
+      return;
+    }
+
+    const { error } = await insforge.database.from("trip_members").update({ status: "removed" }).eq("id", memberId);
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo retirar a este miembro.");
+    }
+  },
+
+  async getInvitationPreview(token: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return getInvitationPreviewFallback(token);
+    }
+
+    const { data, error } = await insforge.database.rpc("get_trip_invitation_preview", {
+      invitation_token: token
+    });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo cargar la invitacion.");
+    }
+
+    const rows = normalizeRpcRows(data);
+    return rows.length > 0 ? normalizeTripInvitationPreview(rows[0]) : null;
+  },
+
+  async acceptInvitation(token: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      const invitation = tripInvitations.find((item) => item.token === token || item.shareUrl?.endsWith(`/${token}`));
+
+      if (!invitation) {
+        throw new Error("La invitacion ya no esta disponible.");
+      }
+
+      invitation.status = "accepted";
+      return { tripId: invitation.tripId };
+    }
+
+    const { data, error } = await insforge.database.rpc("accept_trip_invitation", {
+      invitation_token: token
+    });
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo aceptar la invitacion.");
+    }
+
+    const rows = normalizeRpcRows(data);
+    const tripId = rows[0]?.trip_id;
+
+    if (typeof tripId !== "string") {
+      throw new Error("La invitacion se acepto, pero no pudimos abrir el viaje.");
+    }
+
+    return { tripId };
   },
 
   async createTrip(user: AuthUser, input: TripUpsertInput) {

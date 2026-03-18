@@ -17,6 +17,7 @@ import { ProfileScreen } from "../modules/profile/screens/profile-screen";
 import { ReservationsScreen } from "../modules/reservations/screens/reservations-screen";
 import { SettingsScreen } from "../modules/settings/screens/settings-screen";
 import { DashboardScreen } from "../modules/trips/screens/dashboard-screen";
+import { AcceptInvitationScreen } from "../modules/trips/screens/accept-invitation-screen";
 import { MembersScreen } from "../modules/trips/screens/members-screen";
 import { TripsScreen } from "../modules/trips/screens/trips-screen";
 import { ExpensesScreen } from "../modules/expenses/screens/expenses-screen";
@@ -58,6 +59,7 @@ export function AppRouter() {
         <Route path="/auth/login" element={<LoginScreen />} />
         <Route path="/auth/register" element={<RegisterScreen />} />
         <Route path="/auth/recover" element={<RecoverScreen />} />
+        <Route path="/invite/:token" element={<AcceptInvitationScreen />} />
 
         <Route element={<ProtectedLayout />}>
           <Route path="/trips" element={<TripsScreen />} />

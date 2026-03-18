@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../../../app/providers/session-provider";
-import type { Trip, TripInvitation, TripMember, TripRole, TripUpsertInput } from "../domain/types";
+import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripRole, TripUpsertInput } from "../domain/types";
 import { tripsQueries } from "./trips-queries";
 
 export function useTripsList() {
@@ -51,6 +51,7 @@ export function useTripsList() {
 }
 
 export function useTripOverview(tripId?: string) {
+  const { user } = useSession();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [members, setMembers] = useState<TripMember[]>([]);
   const [invitations, setInvitations] = useState<TripInvitation[]>([]);
@@ -109,6 +110,26 @@ export function useTripOverview(tripId?: string) {
     setInvitations([]);
   }
 
+  async function createInvitation(email: string) {
+    if (!tripId || !user) {
+      throw new Error("Necesitas un viaje activo y una sesion iniciada para invitar a alguien.");
+    }
+
+    const invitation = await tripsQueries.createInvitation(tripId, user.id, email);
+    setInvitations((currentInvitations) => [invitation, ...currentInvitations.filter((item) => item.email !== invitation.email)]);
+    return invitation;
+  }
+
+  async function revokeInvitation(invitationId: string) {
+    await tripsQueries.revokeInvitation(invitationId);
+    setInvitations((currentInvitations) => currentInvitations.filter((item) => item.id !== invitationId));
+  }
+
+  async function removeMember(memberId: string) {
+    await tripsQueries.removeMember(memberId);
+    setMembers((currentMembers) => currentMembers.filter((item) => item.id !== memberId));
+  }
+
   return {
     trip,
     members,
@@ -117,7 +138,10 @@ export function useTripOverview(tripId?: string) {
     error,
     reload,
     updateTrip,
-    deleteTrip
+    deleteTrip,
+    createInvitation,
+    revokeInvitation,
+    removeMember
   };
 }
 
@@ -211,5 +235,71 @@ export function useTripPermission(tripId?: string) {
     loading,
     isAdmin: role === "admin",
     hasAccess: role !== null
+  };
+}
+
+export function useTripInvitationPreview(token?: string) {
+  const [invitation, setInvitation] = useState<TripInvitationPreview | null>(null);
+  const [loading, setLoading] = useState(Boolean(token));
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadInvitation() {
+      if (!token) {
+        if (active) {
+          setInvitation(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const nextInvitation = await tripsQueries.getInvitationPreview(token);
+
+        if (active) {
+          setInvitation(nextInvitation);
+        }
+      } catch (queryError) {
+        if (active) {
+          setError(queryError instanceof Error ? queryError.message : "No se pudo cargar la invitacion.");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadInvitation();
+
+    return () => {
+      active = false;
+    };
+  }, [token]);
+
+  return {
+    invitation,
+    loading,
+    error,
+    reload: async () => {
+      if (!token) {
+        setInvitation(null);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        setError(null);
+        setInvitation(await tripsQueries.getInvitationPreview(token));
+      } catch (queryError) {
+        setError(queryError instanceof Error ? queryError.message : "No se pudo cargar la invitacion.");
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 }

@@ -54,7 +54,7 @@ export const authClient = {
     return normalizeAuthUser(data.user);
   },
 
-  async signInWithGoogle(): Promise<AuthUser | null> {
+  async signInWithGoogle(redirectPath = "/trips"): Promise<AuthUser | null> {
     const insforge = getInsforgeClient();
 
     if (!insforge) {
@@ -66,7 +66,7 @@ export const authClient = {
 
     const { data, error } = await insforge.auth.signInWithOAuth({
       provider: "google",
-      redirectTo: `${window.location.origin}/trips`
+      redirectTo: `${window.location.origin}${redirectPath}`
     });
 
     if (error) {

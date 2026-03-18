@@ -1,16 +1,60 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { AdminOnlyAction } from "../../../app/components/route-guards";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import { useTripOverview } from "../data/use-trips-data";
+import { Input } from "../../../components/ui/input";
+import { useTripOverview, useTripPermission } from "../data/use-trips-data";
 
 export function MembersScreen() {
   const { tripId } = useParams();
-  const { trip, members, invitations, loading, error } = useTripOverview(tripId);
+  const { trip, members, invitations, loading, error, createInvitation, revokeInvitation, removeMember } = useTripOverview(tripId);
+  const { isAdmin } = useTripPermission(tripId);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  async function handleCreateInvitation() {
+    try {
+      setSubmitting(true);
+      setActionError(null);
+      await createInvitation(inviteEmail);
+      setInviteEmail("");
+      setShowInviteForm(false);
+    } catch (creationError) {
+      setActionError(creationError instanceof Error ? creationError.message : "No se pudo crear la invitacion.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleCopyLink(invitationId: string, shareUrl?: string) {
+    if (!shareUrl) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedId(invitationId);
+      window.setTimeout(() => setCopiedId((currentId) => (currentId === invitationId ? null : currentId)), 2000);
+    } catch {
+      setActionError("No hemos podido copiar el enlace. Puedes copiarlo manualmente desde la tarjeta.");
+    }
+  }
+
+  function handleShareWhatsapp(email: string, shareUrl?: string) {
+    if (!shareUrl) {
+      return;
+    }
+
+    const message = `Te he invitado a Viajemos para organizar nuestro viaje. Entra aqui con ${email}: ${shareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
 
   if (loading) {
     return <div className="flex min-h-[40vh] items-center justify-center text-sm text-slate-500">Cargando aventureros...</div>;
@@ -30,11 +74,38 @@ export function MembersScreen() {
         title="Aventureros"
         description="Roles admin/member, invitaciones privadas y gestion de acceso por viaje."
         action={
-          <AdminOnlyAction tripId={trip.id} fallback={<Button variant="secondary" disabled>Solo admin</Button>}>
-            <Button disabled>Invitacion en M3</Button>
-          </AdminOnlyAction>
+          isAdmin ? (
+            <Button onClick={() => setShowInviteForm((current) => !current)}>{showInviteForm ? "Cancelar" : "Invitar"}</Button>
+          ) : (
+            <Button variant="secondary" disabled>
+              Solo admin
+            </Button>
+          )
         }
       />
+      {actionError ? <p className="text-sm font-medium text-rose-600">{actionError}</p> : null}
+      {isAdmin && showInviteForm ? (
+        <Card className="p-5">
+          <SectionHeader
+            title="Invitar por email"
+            description="Se crea una invitacion privada con enlace compartible y acceso protegido por email."
+          />
+          <div className="mt-4 flex flex-col gap-3 md:flex-row">
+            <Input
+              type="email"
+              value={inviteEmail}
+              onChange={(event) => setInviteEmail(event.target.value)}
+              placeholder="amiga@correo.com"
+            />
+            <Button onClick={() => void handleCreateInvitation()} disabled={submitting || !inviteEmail.trim()}>
+              {submitting ? "Enviando..." : "Crear invitacion"}
+            </Button>
+          </div>
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            El enlace se puede copiar o compartir por WhatsApp desde la lista inferior.
+          </p>
+        </Card>
+      ) : null}
       <Card className="p-5">
         <div className="space-y-4">
           {members.length === 0 ? (
@@ -60,6 +131,23 @@ export function MembersScreen() {
                 <div className="flex items-center gap-2">
                   <Badge>{member.role}</Badge>
                   <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">{member.status}</Badge>
+                  {isAdmin && member.role !== "admin" ? (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setActionError(null);
+                        void removeMember(member.id).catch((removalError) => {
+                          setActionError(
+                            removalError instanceof Error
+                              ? removalError.message
+                              : "No se pudo expulsar a este miembro."
+                          );
+                        });
+                      }}
+                    >
+                      Expulsar
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             ))
@@ -74,12 +162,37 @@ export function MembersScreen() {
           ) : (
             invitations.map((invitation) => (
               <div key={invitation.id} className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-white">{invitation.email}</p>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{invitation.shareUrl ?? invitation.token}</p>
+                    <p className="mt-1 break-all text-sm text-slate-500 dark:text-slate-400">
+                      {invitation.shareUrl ?? invitation.token}
+                    </p>
                   </div>
-                  <Badge>{invitation.status}</Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge>{invitation.status}</Badge>
+                    <Button variant="secondary" onClick={() => void handleCopyLink(invitation.id, invitation.shareUrl)}>
+                      {copiedId === invitation.id ? "Copiado" : "Copiar enlace"}
+                    </Button>
+                    <Button variant="secondary" onClick={() => handleShareWhatsapp(invitation.email, invitation.shareUrl)}>
+                      WhatsApp
+                    </Button>
+                    {isAdmin ? (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setActionError(null);
+                          void revokeInvitation(invitation.id).catch((revokeError) => {
+                            setActionError(
+                              revokeError instanceof Error ? revokeError.message : "No se pudo revocar la invitacion."
+                            );
+                          });
+                        }}
+                      >
+                        Revocar
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             ))
