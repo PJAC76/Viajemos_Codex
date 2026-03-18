@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">flight_takeoff</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">ViajeApp</h2>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Resumen</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary py-1" href="#">Gastos</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Itinerario</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Documentos</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 placeholder:text-slate-500 px-4 rounded-l-none pl-2 text-sm font-normal" placeholder="Buscar gastos..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex size-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex size-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Avatar circular del perfil de usuario" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCU5Hj6BfsjNTs1dryUJmUXvqyjArwxcmUoSXaZAyKjZwBrV_LC7SGGadz8WzKU-O6xkwZNhjaVtUdQ66QFBz7a64kOnAvGxKPvl6KBLVa9fsiVkGahvErA-v4MZD5pXEyUPt1ACpfVaDX9oQdSSt-dkjeV0UYkj3YobygewG11CH3VlzvPCmd_lAhQfTnOKF-XlDxIpbc-U7NgzIepNPX3xRLeHWTHIzk88kiZd2PwP23dcMdh1RdYJUZIapfven4SwigDTgs2GeY");'></div>
+</div>
+</header>
+<main class="flex flex-1 flex-col px-4 md:px-10 lg:px-40 py-8 gap-8">
+<!-- Header Section -->
+<div class="flex flex-wrap justify-between items-end gap-4">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-[-0.033em]">Gastos del Viaje</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal">Sincroniza y gestiona las cuentas de tu grupo en tiempo real</p>
+</div>
+<button class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+                    Añadir Gasto
+                </button>
+</div>
+<!-- Prominent Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="flex flex-col gap-3 rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Total Gastado</p>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-extrabold">€2.450,00</p>
+<span class="text-emerald-500 text-sm font-bold flex items-center bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded">+15% este mes</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-600">account_balance_wallet</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Tu Saldo Actual</p>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-emerald-600 dark:text-emerald-400 tracking-tight text-3xl font-extrabold">+€125,50</p>
+<span class="text-slate-500 text-sm font-medium">A tu favor</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 rounded-2xl p-6 bg-primary text-white shadow-xl shadow-primary/20">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-white/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white">group</span>
+</div>
+<p class="text-white/80 text-sm font-semibold uppercase tracking-wider">Participantes</p>
+</div>
+<div class="flex items-center -space-x-2">
+<img class="size-10 rounded-full border-2 border-primary" data-alt="Avatar de Ana" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6_609qOqQOwTq6xq72jHTdLuca6BzYfczthGRzgNDq7FM7IfzHibyZ4ExfbdUJgjAdRZq-cy_L2q6CKR_4b4fhPk4-xlPbLicpRDkjCJ_1MGpi5YzfYxxLSNGjEn0CXu_rTQwcplU6FQc3tY6Lqf9u7CggpBKWRfvWS2sDV90Tp6zOakSs3EnXXACM_mRzyCbWDRQf2vyLChPHRpRlU9IksWNRaC0Ap1J5engJ67oSid4wL1y3hrCI_20sdO1PgiKmKvDzI_2dEg"/>
+<img class="size-10 rounded-full border-2 border-primary" data-alt="Avatar de Juan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUu7mmnZQPw1wjVfvYs2AYwdGZOan9xsJ0_KSfNXfIm9Le9W2UnJgdZ7WmKiR2hnBRW64dCX0TTo2JiZ2Mx0KQPns36wBovrEsuFK49VfJYUfsc5oZ7kHMyRTHRVZicNiF5tMsREGTEd2a6dUOJC2rVVZ-_ifpChOWTVfomaaqWfeCDxCC4WOFW37V8daHoSJRPPSrmMNA2xGDeTIQukItPKrsPfOae91KGrLav8H0k4C6z9oHwlEDR8RPtXU2ZPmGebPtb-MnQGY"/>
+<img class="size-10 rounded-full border-2 border-primary" data-alt="Avatar de Carlos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjffCBivT12NvUtgzpHMsgeWYy6aFCwmLHruFF7XEen3lhGaxCkbz3bJYcbABFW6S5zsjcHK1gqlTP3CJ_VzaWXs7fXzbsYRD8jvneMxP3Fek6NlLEAHq7Bxwf_aK8h14DP81ngF1tuqnFrYFkXMkFimqFCuCu_tFGOb9wZMYtZc7Y9ve3q5vThyMKoaNkK_KAWdcLXHmMms28yW0OhE73LEameo_VnLiQJU-cHDnWNFMOZL0SPYclqHT5WEa9iLnYLHsYgW8amhM"/>
+<div class="size-10 rounded-full border-2 border-primary bg-primary-dark flex items-center justify-center text-xs font-bold bg-slate-800">+1</div>
+</div>
+</div>
+</div>
+<!-- Main Content Split Layout -->
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- Left Section: Ajustando Cuentas -->
+<section class="w-full lg:w-1/3 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">balance</span>
+                            Ajustando Cuentas
+                        </h2>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group">
+<div class="size-12 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-800">
+<img class="w-full h-full object-cover" data-alt="Retrato de Ana" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQlI0o6uZE1y3YJwQ7FcRkeXePfBNdH2n--ewxuy3wvUHsmKFW_rZtJm0gmOkilP99Cg_YkLYOqq0cNFkfsmsuYOwqu2i2kkrADvbx0MQbkJLuGyfkJ_CZ88BjnHDMD8KSxXhf32ffYu8ixjKeYABGcA_S45VIAd0u2rWq9uK3IMRTesmIi1q9NITUBcLVPcMCzrBwkczC0Mgqq9UkbXosGANam2DPjNn0S0H5mQCOyQqlxstJHZ6tbNku7e1z2f1mTSN5vDjb5os"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 font-semibold group-hover:text-primary transition-colors">Ana debe a Juan</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Transferencia pendiente</p>
+</div>
+<div class="text-right">
+<p class="text-rose-500 font-bold">€45,00</p>
+<button class="text-xs text-primary font-bold hover:underline">Saldar</button>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group">
+<div class="size-12 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-800">
+<img class="w-full h-full object-cover" data-alt="Retrato de Carlos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZCAg-mT71juBctrg1lpCqo1nEkt897BfPRi2X2MUQGGzl758r2JMvXmEzkR7u6lOELujTiylnt-p6MjsUTsJczbTcMkgvHVSlngrCze0pRpatAL8FBBqmr-he8v05wfD0NxOl7ngnNz_r4NAgM3TDHc-lw01jGgcxnQzImJN1m284fXnc0OayCvCvEkjfDOEtyd-tITempZss9tl3tRaPOm6dvclWGHP6E6NY5YsrSB_QoTtfFD-nUpn2e4BjlU68uF-xs67AV2c"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 font-semibold group-hover:text-primary transition-colors">Carlos debe a Ana</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Cena compartida</p>
+</div>
+<div class="text-right">
+<p class="text-rose-500 font-bold">€20,00</p>
+<button class="text-xs text-primary font-bold hover:underline">Saldar</button>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group">
+<div class="size-12 rounded-full overflow-hidden border-2 border-primary/40 bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 font-semibold group-hover:text-primary transition-colors">Tú debes a Carlos</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Entradas museo</p>
+</div>
+<div class="text-right">
+<p class="text-rose-500 font-bold">€12,00</p>
+<button class="text-xs text-primary font-bold hover:underline">Saldar</button>
+</div>
+</div>
+</div>
+<button class="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 font-semibold hover:border-primary hover:text-primary transition-all">
+                        Ver desglose completo
+                    </button>
+</section>
+<!-- Right Section: Gastos Recientes -->
+<section class="w-full lg:w-2/3 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+                            Gastos Recientes
+                        </h2>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-sm">filter_alt</span> Filtrar
+                            </button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-sm">download</span> Exportar
+                            </button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<tr>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Concepto</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Categoría</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pagado por</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Importe</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-orange-100 dark:bg-orange-500/10 text-orange-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Cena Trattoria Luzzi</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Ayer, 21:30</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400">Comida</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img class="size-6 rounded-full" data-alt="Juan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGSHIKjANZ0UYmuntXPZ1mSa4Nx2s7ugrLn0vjhUOmdH28krYoGn8ZAA1dRVdGFJ7Qw_sRtjUifjANN223xIDcvo9qAFkTqGagxsP9M6qbU3GfFxb9nXVBC4wSSaQJ4-CJ3stCNE8w67l-HKJSP6wxSMhLnq89ErJQkyjZkMbqF55WyCIaHQCBw7qroQ5AaZ52edgk5DwExDnAomYWM-MlofqaafS_IYN8gYkYtdywTIvikp3RIGivb44oh4QYNBzPzhnF657l2SM"/>
+<span class="text-sm font-medium">Juan</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<p class="text-slate-900 dark:text-slate-100 font-bold">€112,00</p>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-blue-100 dark:bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">directions_car</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Alquiler Coche (3 días)</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">15 Oct, 10:00</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">Transporte</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-white">YO</div>
+<span class="text-sm font-medium">Tú</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<p class="text-slate-900 dark:text-slate-100 font-bold">€245,00</p>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-purple-100 dark:bg-purple-500/10 text-purple-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">theater_comedy</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Entradas Coliseo</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">14 Oct, 09:15</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400">Ocio</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img class="size-6 rounded-full" data-alt="Ana" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKhAzOXOeHXan6ARSuQOl6dfB7HgPr8aG4qVVZiire6QSP8DPH0Fr2JDIhdYU06FIsreN2SWrYrtK7JBqLgIZcykHlJE-cflLLf94E1_wR3otRxRMOklvOADazd5OUQRDMIcWAK-3NYRhtZvkODiD4ScpxcbGvFOXaWuqccuJHlXUuJkik3lMj5P5qsDuWeIx5PBwa_8-eMOZgnmt3zOgjE60kwq5FLA420SJwJ_z6aYQunOgJzR3d_TIJavxu594zLtDqLhZ29qs"/>
+<span class="text-sm font-medium">Ana</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<p class="text-slate-900 dark:text-slate-100 font-bold">€64,00</p>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">hotel</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Airbnb Reserva Roma</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">12 Oct, 18:00</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">Alojamiento</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-white">YO</div>
+<span class="text-sm font-medium">Tú</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<p class="text-slate-900 dark:text-slate-100 font-bold">€850,00</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-4 border-t border-slate-100 dark:border-slate-800 text-center">
+<button class="text-primary font-bold text-sm hover:underline">Ver todos los gastos</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="mt-auto px-10 py-6 border-t border-slate-200 dark:border-slate-800 text-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">© 2024 ViajeApp - Organiza tus aventuras sin complicaciones.</p>
+</footer>
+</div>
+</body></html>

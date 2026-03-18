@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itinerario Diario - Explorador de Viajes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">travel_explore</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Explorador de Viajes</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden">
+<div class="text-slate-400 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 focus:ring-0 h-full placeholder:text-slate-500 px-4 text-base font-normal" placeholder="Buscar destinos..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-medium" href="#">Mis Viajes</a>
+<a class="text-primary text-sm font-bold" href="#">Explorar</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-medium" href="#">Favoritos</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm font-medium" href="#">Perfil</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-primary/20 rounded-full size-10 flex items-center justify-center text-primary font-bold overflow-hidden border border-primary/30">
+<img class="w-full h-full object-cover" data-alt="Avatar circular del usuario" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3w9KwMBLErg8pRz61BTLJ2Q5_V1L78kPH_qPEjVevmF6TA6GIegRVxeyMM65Zr3YP_FFx6RWkHCZVUGfKcbU41KP7EG1-45pN6l7gjVQCS03C5VJfAq3BSMSIVQzOGWCqI9rURWL7ji2TWKDS7aj1LEfMpm8I61K2Nf7eHYGcFhnQ4c9YkPZjNCgrYen9pePSQTedOyUvfBIHntLdWygf5LZdxSe6jLL_MoOK1nPrwzzHf17SCVUEVKMU6MHMiv9Fp9lEw34U6RA"/>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col max-w-[1440px] mx-auto w-full px-10 py-6 gap-6">
+<!-- Hero Header Section -->
+<div class="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex gap-4 items-center">
+<div class="size-16 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Icono representativo de Madrid con monumentos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFT4lh3WTnYDpWbs2Hdf-MISzEoSPs5sLkUqNPs50SQOcnCccLtYXQL98dVnRpIBH7zs96xxDcHTox7mk1KVoQn5tXLOoazZpLSYx5bxjFWBPpMtN22S1dUegeosqvwzUs0hxeCIzR06GsSgZ1qP2jXAF3qcaRj__oM9FT-uZ6cr_KteyQfneUn152lMxbg9otL_lZzBoRxuApPFFROqmbVoZkOcz5eJ1gVZO6_Ild5TCFzVT43nqee8YY6Emb88zHDhqR290ZzBk"/>
+</div>
+<div>
+<h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Madrid 2024</h1>
+<p class="text-slate-500 dark:text-slate-400 font-medium">6 de Oct - 11 de Oct • 2 Viajeros</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-bold text-sm text-slate-700 dark:text-slate-200">
+<span class="material-symbols-outlined text-lg">share</span> Compartir
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm">
+<span class="material-symbols-outlined text-lg">edit</span> Editar Itinerario
+                    </button>
+</div>
+</div>
+<!-- Day Selector Tabs -->
+<div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 overflow-x-auto no-scrollbar">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-primary text-primary pb-3 px-2 font-bold whitespace-nowrap" href="#">Día 1 <span class="text-[10px] font-normal block">6 Oct</span></a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 2 <span class="text-[10px] font-normal block">7 Oct</span></a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 3 <span class="text-[10px] font-normal block">8 Oct</span></a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 4 <span class="text-[10px] font-normal block">9 Oct</span></a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 5 <span class="text-[10px] font-normal block">10 Oct</span></a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 6 <span class="text-[10px] font-normal block">11 Oct</span></a>
+</div>
+<!-- Main Split Content -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+<!-- Left Column: Chronological Timeline -->
+<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-1">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Itinerario del Día</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Organiza tu aventura paso a paso</p>
+</div>
+<div class="flex flex-col">
+<!-- Activity 1 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-10 rounded-full bg-primary flex items-center justify-center text-white ring-4 ring-primary/20">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div class="w-0.5 grow bg-slate-200 dark:bg-slate-700 my-2"></div>
+</div>
+<div class="flex-1 pb-8 pt-1">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Desayuno en Café Central</h4>
+<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">09:00 AM</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Comienza el día con el mejor chocolate con churros de la ciudad en este café histórico.</p>
+<div class="flex items-center gap-2 text-slate-500 text-xs font-medium">
+<span class="material-symbols-outlined text-sm">directions_walk</span>
+<span>45 min de caminata hacia el siguiente punto</span>
+</div>
+</div>
+</div>
+<!-- Activity 2 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-10 rounded-full bg-white dark:bg-slate-800 border-2 border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">museum</span>
+</div>
+<div class="w-0.5 grow bg-slate-200 dark:bg-slate-700 my-2"></div>
+</div>
+<div class="flex-1 pb-8 pt-1">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Visita al Museo del Prado</h4>
+<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">11:00 AM</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Reserva recomendada para ver las obras maestras de Velázquez y Goya sin colas.</p>
+<div class="flex items-center gap-2 text-slate-500 text-xs font-medium">
+<span class="material-symbols-outlined text-sm">directions_car</span>
+<span>15 min en coche hacia el siguiente punto</span>
+</div>
+</div>
+</div>
+<!-- Activity 3 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-10 rounded-full bg-white dark:bg-slate-800 border-2 border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="w-0.5 grow bg-slate-200 dark:bg-slate-700 my-2"></div>
+</div>
+<div class="flex-1 pb-8 pt-1">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Almuerzo en Plaza Mayor</h4>
+<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">02:00 PM</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Tapas y bocadillo de calamares bajo los soportales de la plaza más emblemática.</p>
+<div class="flex items-center gap-2 text-slate-500 text-xs font-medium">
+<span class="material-symbols-outlined text-sm">directions_walk</span>
+<span>20 min de caminata hacia el siguiente punto</span>
+</div>
+</div>
+</div>
+<!-- Activity 4 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-10 rounded-full bg-white dark:bg-slate-800 border-2 border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">park</span>
+</div>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Recorrido por el Parque del Retiro</h4>
+<span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">04:30 PM</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Paseo en barca por el estanque y visita al Palacio de Cristal antes del atardecer.</p>
+<div class="flex items-center gap-2 text-slate-500 text-xs font-medium">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>Fin de las actividades del día</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Map -->
+<div class="sticky top-24">
+<div class="relative w-full aspect-[4/3] lg:aspect-square bg-slate-200 dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg group">
+<!-- Mock Map Background -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Mapa detallado de Madrid con pines de actividades" data-location="Madrid" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6nPqjuFMm0B4nIpDkizH5SbUT4SPD5g_OjDVSmvSP0jATc_adQ0v2JtRfXqh0xhpcVgZF8VlAi_k7UeBlskDooH58Aauk5l3NxdTC9zbOeCRlDFt_tHY441Wr1KFpA6UJNJAwMIYtPfWhDEr6D9w1Wzgog7ZiWgr4wzs9VrUso7BiRCMdGajioj4FL58fcvgm3I3IWwL2qIDastxDPjGs3W5IC2g8hF23mdAmt2Plwv8wsiLXBGD6bglhilE33YGs4psoDw-OD_k')">
+<!-- Overlay markers and paths -->
+<div class="absolute inset-0 bg-primary/5"></div>
+<!-- Custom Map Marker 1 -->
+<div class="absolute top-[20%] left-[30%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-1 rounded-full shadow-lg ring-4 ring-white">
+<span class="material-symbols-outlined text-lg">coffee</span>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-white dark:bg-slate-900 text-[10px] font-bold rounded shadow border dark:border-slate-700">Café Central</span>
+</div>
+<!-- Custom Map Marker 2 -->
+<div class="absolute top-[40%] left-[60%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-1 rounded-full shadow-lg ring-4 ring-white">
+<span class="material-symbols-outlined text-lg">museum</span>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-white dark:bg-slate-900 text-[10px] font-bold rounded shadow border dark:border-slate-700">M. del Prado</span>
+</div>
+<!-- Custom Map Marker 3 -->
+<div class="absolute top-[65%] left-[45%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-1 rounded-full shadow-lg ring-4 ring-white">
+<span class="material-symbols-outlined text-lg">restaurant</span>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-white dark:bg-slate-900 text-[10px] font-bold rounded shadow border dark:border-slate-700">Plaza Mayor</span>
+</div>
+<!-- Custom Map Marker 4 -->
+<div class="absolute top-[50%] left-[80%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-1 rounded-full shadow-lg ring-4 ring-white">
+<span class="material-symbols-outlined text-lg">park</span>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-white dark:bg-slate-900 text-[10px] font-bold rounded shadow border dark:border-slate-700">El Retiro</span>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute right-4 bottom-4 flex flex-col gap-2">
+<button class="size-10 bg-white dark:bg-slate-900 rounded-lg shadow-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="size-10 bg-white dark:bg-slate-900 rounded-lg shadow-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="size-10 bg-white dark:bg-slate-900 rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-slate-50 transition-colors mt-2">
+<span class="material-symbols-outlined">my_location</span>
+</button>
+</div>
+<!-- Map Float Info -->
+<div class="absolute top-4 left-4 right-4 flex justify-between">
+<div class="bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">navigation</span>
+<span class="text-xs font-bold text-slate-700 dark:text-slate-200">Ruta optimizada</span>
+</div>
+</div>
+</div>
+<!-- Additional Sidebar Stats/Info -->
+<div class="mt-4 grid grid-cols-3 gap-4">
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Caminata Total</p>
+<p class="text-lg font-bold text-slate-900 dark:text-white">5.2 km</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Calorías Est.</p>
+<p class="text-lg font-bold text-slate-900 dark:text-white">420 kcal</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Tiempo de Tránsito</p>
+<p class="text-lg font-bold text-slate-900 dark:text-white">1h 20m</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Footer Nav (Mobile/Utility) -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 z-50">
+<button class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100">
+<span class="material-symbols-outlined text-xl">calendar_month</span>
+<span class="text-[10px] font-bold">Calendario</span>
+</button>
+<div class="w-px h-6 bg-white/20 dark:bg-slate-900/20"></div>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-xl">map</span>
+<span class="text-[10px] font-bold">Itinerario</span>
+</button>
+<div class="w-px h-6 bg-white/20 dark:bg-slate-900/20"></div>
+<button class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100">
+<span class="material-symbols-outlined text-xl">payments</span>
+<span class="text-[10px] font-bold">Gastos</span>
+</button>
+<div class="w-px h-6 bg-white/20 dark:bg-slate-900/20"></div>
+<button class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100">
+<span class="material-symbols-outlined text-xl">description</span>
+<span class="text-[10px] font-bold">Docs</span>
+</button>
+</div>
+</div>
+</body></html>

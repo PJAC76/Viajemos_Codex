@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header / Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">explore</span>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">Viajes</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-slate-100 dark:bg-slate-800">
+<div class="text-slate-500 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:ring-0 h-full placeholder:text-slate-500 px-4 text-base font-normal" placeholder="Buscar destinos..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-8">
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Explorar</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Mis Viajes</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Sitios y Reservas</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Perfil</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-[1200px] mx-auto w-full px-6 py-8">
+<!-- Hero Section -->
+<div class="flex flex-col gap-2 mb-8">
+<h1 class="text-slate-900 dark:text-white text-4xl font-extrabold tracking-tight">Sitios y Reservas</h1>
+<p class="text-slate-600 dark:text-slate-400 text-lg">Gestiona tus próximas estancias y experiencias gastronómicas en un solo lugar.</p>
+</div>
+<!-- Tabs -->
+<div class="mb-8 border-b border-slate-200 dark:border-slate-800">
+<div class="flex gap-10">
+<button class="flex items-center gap-2 border-b-2 border-primary text-primary pb-4 font-bold transition-all">
+<span class="material-symbols-outlined">hotel</span>
+                            Hoteles
+                        </button>
+<button class="flex items-center gap-2 border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-4 font-medium hover:text-slate-700 dark:hover:text-slate-200 transition-all">
+<span class="material-symbols-outlined">restaurant</span>
+                            Comida y Bebida
+                        </button>
+</div>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Hotel Card 1 -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+<div class="relative h-48 w-full bg-cover bg-center" data-alt="Luxury hotel plaza in Madrid Spain" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmqNJ8e7hAQTnmtCoQ20kMPV83v3fT4rphVJ1nYwk5zoqLTlORFoNtquDktSr8NGeucoS0TMZQVGI7EpzFSicJEb1UmUv7SFw8Fdp0n2qtviM3-O96H6m5BOS5C58eFeYn2qZF6pEQr_1zWqThkcXgRmh9cfBFZlRrv8iGH9fX3BEjw4HnPXzMQKpJ8KLa1eN6XKXTZ3ugbO3ez36laLAHZ7h_7d25wNBrJW0TyoHg2BBTghWjgVYXg6WGEg0rl21v15YLA_xE16A");'>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-primary">
+                                CONFIRMADO
+                            </div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">Hotel Madrid Plaza</h3>
+<div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">confirmation_number</span>
+<span>Confirmación: #12345</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">calendar_today</span>
+<span>Entrada: 12 Oct, 2024</span>
+</div>
+</div>
+<button class="mt-2 w-full py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">qr_code_2</span>
+                                Ver Ticket Digital
+                            </button>
+</div>
+</div>
+<!-- Hotel Card 2 -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+<div class="relative h-48 w-full bg-cover bg-center" data-alt="Grand Hyatt hotel exterior Barcelona" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4TJYFeNirr0CN8KBbm7J2_aY1NVs1D74vJigRce9hFT-_-AXYVWsOYIWYN0ZK-DPFYlbF1DDlficPuxyGrXy4Gjfn3UNPswf60HS65dClWljzDjMtha7nu1VjkHzBL3xcXhQY498IelzrJ7dlocPhfnjgZAjH1ENP_loneCDWfCKmeX6h4xmDhZnGfdnYFTM7NCm-_jBEkYwalNUVcyv97frf6_qZqivRQYc3lKUfW6Z_6mLF3FiRNqA-PiWN1hLNaocGKbwQnFo");'>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-primary">
+                                CONFIRMADO
+                            </div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">Grand Hyatt Barcelona</h3>
+<div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">confirmation_number</span>
+<span>Confirmación: #67890</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">calendar_today</span>
+<span>Entrada: 15 Oct, 2024</span>
+</div>
+</div>
+<button class="mt-2 w-full py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">qr_code_2</span>
+                                Ver Ticket Digital
+                            </button>
+</div>
+</div>
+<!-- Restaurant Card 1 -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+<div class="relative h-48 w-full bg-cover bg-center" data-alt="High end restaurant interior fine dining" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB3zRhcUcjXuVBbgSRB982aEUQbtWIii1RJOJ5PEvdYPNrG7K801PRl0VQ2LZrwErD1xKk6w_UVzXLO0DqbzGGfWL5-zWRQCiSaGOnZlihcNupXxVOlmSFqs2VewKE1CcOeOmh-3ji8gpCUef0ftNmi5H9mKlpcyduZR3e7eFWuLZmWl6HStsdgCaUFgjbfxRxjnGRm5nU6TpSC8M7t-rEzd7epMXS-54Gqi0PRp7oZDw1OgVW6MEvdeIeJoRqgT2nFyIeM65efzEc");'>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-slate-700">
+                                RESERVADO
+                            </div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">Restaurante El Bulli</h3>
+<div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>Hora: 20:30h</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">group</span>
+<span>Mesa para 2 personas</span>
+</div>
+</div>
+<button class="mt-2 w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">info</span>
+                                Detalles de Reserva
+                            </button>
+</div>
+</div>
+<!-- Restaurant Card 2 -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+<div class="relative h-48 w-full bg-cover bg-center" data-alt="Tapas experience at Boqueria market" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDupeBHhiL1Opy6htudzFyivFi8YO9tG71aD0fg_2wgi8Jg7ApKqsHcEIM_6CQUKY80Cc88y1wxYs_WHAy5x4Q_Wq9nd3o7zbvajdDpDi7cPTWyyesrMDyDh9Tazs9KSxROh6s1NecG-J2QSLUo204kI9NFihdYvO33hvgmABypAFXZ8MLYWeRFm4Mu5jW7PFAIv2G7bUOB7dAfwRgvyUtQ00ID7THGmIToKTLUIuH4c26vzhVYAck10DRIXedeSzVyDtWuhsX6pwk");'>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-slate-700">
+                                RESERVADO
+                            </div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">La Boqueria Experience</h3>
+<div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">schedule</span>
+<span>Hora: 14:00h</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">group</span>
+<span>Mesa para 4 personas</span>
+</div>
+</div>
+<button class="mt-2 w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">info</span>
+                                Detalles de Reserva
+                            </button>
+</div>
+</div>
+</div>
+<!-- Digital Tickets Section -->
+<div class="mt-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-slate-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em]">Tus Tickets Digitales</h2>
+<button class="text-primary font-bold text-sm hover:underline">Ver todos</button>
+</div>
+<div class="bg-primary/5 dark:bg-primary/10 border-2 border-dashed border-primary/30 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+<div class="bg-primary/20 p-4 rounded-full mb-4">
+<span class="material-symbols-outlined text-primary text-4xl">qr_code_scanner</span>
+</div>
+<h4 class="text-slate-900 dark:text-white text-lg font-bold">Sin tickets pendientes de check-in</h4>
+<p class="text-slate-500 dark:text-slate-400 max-w-md mt-2">Tus pases de abordar y entradas a monumentos aparecerán aquí 24 horas antes de tu actividad.</p>
+<button class="mt-6 px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25">
+                            Explorar Actividades
+                        </button>
+</div>
+</div>
+</main>
+<!-- Bottom Spacer / Footer placeholder -->
+<footer class="mt-auto py-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10">
+<div class="max-w-[1200px] mx-auto flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-sm font-medium">© 2024 Viajes S.A. Todos los derechos reservados.</span>
+</div>
+<div class="flex gap-6">
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Ayuda</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Privacidad</a>
+<a class="text-slate-400 hover:text-primary text-sm transition-colors" href="#">Condiciones</a>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

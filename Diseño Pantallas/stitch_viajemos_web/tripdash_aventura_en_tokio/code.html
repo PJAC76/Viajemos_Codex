@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>TripDash - Aventura en Tokio</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+
+    <!-- React and React Router CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Common Components ---
+        const TopNav = ({ title = "ViajeApp", activeTab = "" }) => {
+            return (
+                <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+                    <div class="flex items-center gap-8">
+                        <div class="flex items-center gap-4 text-primary">
+                            <div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary">flight_takeoff</span>
+                            </div>
+                            <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">{title}</h2>
+                        </div>
+                        <nav class="flex items-center gap-6 hidden md:flex">
+                            <Link to="/" class={`text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'text-primary font-bold border-b-2 border-primary py-1' : 'text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary'}`}>Resumen</Link>
+                            <Link to="/sites" class={`text-sm font-medium transition-colors ${activeTab === 'sites' ? 'text-primary font-bold border-b-2 border-primary py-1' : 'text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary'}`}>Sitios y Reservas</Link>
+                            <Link to="/itinerary" class={`text-sm font-medium transition-colors ${activeTab === 'itinerary' ? 'text-primary font-bold border-b-2 border-primary py-1' : 'text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary'}`}>Itinerario</Link>
+                            <Link to="/expenses" class={`text-sm font-medium transition-colors ${activeTab === 'expenses' ? 'text-primary font-bold border-b-2 border-primary py-1' : 'text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary'}`}>Gastos</Link>
+                        </nav>
+                    </div>
+                    <div class="flex flex-1 justify-end gap-4 items-center">
+                        <label class="flex flex-col min-w-40 h-10 max-w-64 hidden sm:flex">
+                            <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                                <div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg">
+                                    <span class="material-symbols-outlined text-[20px]">search</span>
+                                </div>
+                                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 placeholder:text-slate-500 px-4 rounded-l-none pl-2 text-sm font-normal" placeholder="Buscar..." value=""/>
+                            </div>
+                        </label>
+                        <div class="flex gap-2">
+                            <button class="flex size-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <span class="material-symbols-outlined">notifications</span>
+                            </button>
+                            <button class="flex size-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Avatar circular del perfil de usuario" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCU5Hj6BfsjNTs1dryUJmUXvqyjArwxcmUoSXaZAyKjZwBrV_LC7SGGadz8WzKU-O6xkwZNhjaVtUdQ66QFBz7a64kOnAvGxKPvl6KBLVa9fsiVkGahvErA-v4MZD5pXEyUPt1ACpfVaDX9oQdSSt-dkjeV0UYkj3YobygewG11CH3VlzvPCmd_lAhQfTnOKF-XlDxIpbc-U7NgzIepNPX3xRLeHWTHIzk88kiZd2PwP23dcMdh1RdYJUZIapfven4SwigDTgs2GeY")'}}></div>
+                    </div>
+                </header>
+            );
+        };
+
+        // --- Screens ---
+
+        // Screen 1: Dashboard (ID: eb3b338fd0824b1d990e903f9ef59248)
+        const DashboardScreen = () => {
+            return (
+                <div class="flex h-screen overflow-hidden">
+                    {/* Sidebar Navigation */}
+                    <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col hidden md:flex">
+                        <div class="p-6">
+                            <div class="flex items-center gap-3 mb-8">
+                                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                                    <span class="material-symbols-outlined">travel_explore</span>
+                                </div>
+                                <span class="text-xl font-bold tracking-tight">TripDash</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 mb-6 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                <div class="size-10 rounded-full bg-cover bg-center" data-alt="Foto de perfil" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYX1TvDMyOeS9AEYrlcAc6_iXQg1ZdHSs0BO_Km3VKNtHffLbHhVz7EwzjDUnssRvGr71WFe3Vim1Dd13AKDeUfGs34OmVNs4hk9ONCL8oMF9vJdpKycoS-Re6FU7JuaUE7crBZRCkTtuDvdJkRG7h0dZcSg-sSy030V6Mw6i9B_U9gVGQVGgaYD7vEfzSC5kFMwFIlPDQbKs0m7_YouN7g_coHLrVA6WHKETGRtMgDJmeGMfzFuDw3WabiMQoBNpuWFGI3GFYRsM')"}}></div>
+                                <div class="flex flex-col">
+                                    <h1 class="text-sm font-semibold">Alex García</h1>
+                                    <p class="text-xs text-slate-500">Viajero Premium</p>
+                                </div>
+                            </div>
+                            <nav class="space-y-1">
+                                <Link to="/" class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">home</span>
+                                    <span class="text-sm font-medium">Inicio</span>
+                                </Link>
+                                <Link to="/sites" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">public</span>
+                                    <span class="text-sm font-medium">Sitios y Reservas</span>
+                                </Link>
+                                <Link to="/itinerary" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">explore</span>
+                                    <span class="text-sm font-medium">Itinerario</span>
+                                </Link>
+                                <Link to="/expenses" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">payments</span>
+                                    <span class="text-sm font-medium">Gastos</span>
+                                </Link>
+                            </nav>
+                        </div>
+                        <div class="mt-auto p-6">
+                            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">logout</span>
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main class="flex-1 overflow-y-auto">
+                        {/* Mobile Nav Header */}
+                        <div className="md:hidden">
+                             <TopNav title="TripDash" activeTab="dashboard" />
+                        </div>
+
+                        {/* Hero Section */}
+                        <header class="relative h-72 w-full">
+                            <div class="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgG8ooQtbMPrK9FGItDB3yazPyySOHdx7IXTIHIMBGvon41JaMogT9e5kPtN1iAr6yL6-X6zz6i4Ra6xzcCwVITW2jTtC7aAkOnsgLWcg5JHEyvFn-HtN7z-cEDHEElHTjJ_pk3lCCLxTcy0lkQbZKREteKZL2IN0nx36UATcS2yaHoX81YbnIfA1Wj7eBdu-kintY_miuuJDndi4wGZnSs4HwdFbYAfsdX5vDD63l9-FiW53uWa2voGVhIak9EpMSfUnvN50EOp8')"}}>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 p-8 w-full max-w-6xl mx-auto flex justify-between items-end">
+                                <div>
+                                    <h2 class="text-white text-4xl font-extrabold tracking-tight mb-2">Aventura en Tokio</h2>
+                                    <div class="flex items-center gap-2 text-white/90">
+                                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                        <p class="text-sm font-medium">15 de Octubre - 25 de Octubre • 10 días de cultura y neón</p>
+                                    </div>
+                                </div>
+                                <button class="hidden sm:flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all border border-white/30">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    Editar Viaje
+                                </button>
+                            </div>
+                        </header>
+
+                        <div class="max-w-6xl mx-auto px-4 sm:px-8 py-8">
+                            {/* Tabs */}
+                            <div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 mb-8 overflow-x-auto">
+                                <a class="border-b-2 border-primary text-primary pb-4 px-1 text-sm font-bold whitespace-nowrap" href="#">Resumen</a>
+                                <Link to="/itinerary" class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors whitespace-nowrap">Itinerario</Link>
+                                <Link to="/sites" class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors whitespace-nowrap">Reservas</Link>
+                                <Link to="/expenses" class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors whitespace-nowrap">Gastos</Link>
+                            </div>
+
+                            {/* Stats Cards */}
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-sm font-medium text-slate-500">Días Restantes</p>
+                                        <span class="material-symbols-outlined text-primary">schedule</span>
+                                    </div>
+                                    <p class="text-3xl font-bold">4</p>
+                                </div>
+                                <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-sm font-medium text-slate-500">Paradas Visitadas</p>
+                                        <span class="material-symbols-outlined text-primary">location_on</span>
+                                    </div>
+                                    <p class="text-3xl font-bold">12 / 20</p>
+                                    <div class="mt-3 w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-primary h-full rounded-full" style={{width: '60%'}}></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer hover:shadow-md transition-all" onClick={() => window.location.hash = '#/expenses'}>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-sm font-medium text-slate-500">Presupuesto Gastado</p>
+                                        <span class="material-symbols-outlined text-primary">payments</span>
+                                    </div>
+                                    <p class="text-3xl font-bold">65%</p>
+                                    <p class="text-xs text-slate-400 mt-1">Estás dentro del límite planeado</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Main Itinerary Area */}
+                                <div class="lg:col-span-2 space-y-6">
+                                    <div className="flex justify-between items-center">
+                                         <h3 class="text-xl font-bold">Próximas Paradas</h3>
+                                         <Link to="/itinerary" className="text-sm text-primary font-bold hover:underline">Ver todo</Link>
+                                    </div>
+                                   
+                                    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                                        <div class="p-4 flex gap-4">
+                                            <div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCATiBp53O89pgwXKavpQhpUL1iX17H50IUfNKLECVgg0KVAKR2Vgbkj7AqfwaXv0_T9p8nsWKm6sxlChdT3i68a29noJgzz4AMw5xnE658rNQ-nkpMPzVdDywWlTE_nlRKL8scJvvWbkHP9AiWfRGu4kRp2sl5OvSZ-SoohF8XFADkHea5ySJVKzVz2kDdWhzuPxTS5FDmef9lxrWRYSOp1kvGqsMlENLInSId9BENGaJbVfdYVDVLqrlKCk0aliFK8glzwq-HfJc')"}}></div>
+                                            <div class="flex-1">
+                                                <div class="flex justify-between items-start">
+                                                    <div>
+                                                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Mañana • 09:00</span>
+                                                        <h4 class="text-lg font-bold mt-1">Templo Senso-ji</h4>
+                                                        <p class="text-sm text-slate-500">Asakusa, Taito City</p>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 flex gap-2">
+                                                    <span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Cultura</span>
+                                                    <span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Gratis</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Sidebar Area */}
+                                <div class="space-y-8">
+                                    <section>
+                                        <h3 class="text-lg font-bold mb-4">Aventureros (4)</h3>
+                                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <img alt="Alex García" class="size-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBL_kWWsN6Kj8-YVOF2ThqBz-ywb_0m-Kr-tREZVc6kbOXlPE_NdFaw06XHPWbNvGRdVWBjBqL7vgCl0WcpBdm_Q7H3gFylHQIwpzcLBgp3xpnb5QRW4UadR3mV97gvmpAylJlTcykfTbybsdVtj7nbTUTMQYJ2LZk4v4xKHXixo0vrBUVGBLW9WGIrs7okT92H8F5bFOOdbfaky0dwu-y5udZyX6PIZwJb6IRSPZTR9SAhirykpL4J6_3fgP7XDAEYetDHLS5_-RY"/>
+                                                    <span class="text-sm font-semibold">Alex G. (Tú)</span>
+                                                </div>
+                                                <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">LÍDER</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <img alt="Elena M." class="size-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIwqkfCL1AhkMBuMmxUBa7kmKZ_U8OjZmaHDKneiLx_zdaSXspl8yyOk3JdoFq0c3Nx5S6fwvaHyU75OrtFwZAEa2kBoqOzXTsIuU95_nOlJ1c7Me6JrvYatXKHy3w7jtJajbLIxPGyBwMUFyYHOusD94Qbhj8BgHtWL-183kQhz0bBkuBBDpI5hwhzEa0ZlqSjq6Pc4kbW7zx--Uu89Y7csPWCJoXpjciacHlIDtEgxR-MC78Z8pzKqEAehv9r8Gadpt_E5uIkk8"/>
+                                                    <span class="text-sm font-medium">Elena M.</span>
+                                                </div>
+                                            </div>
+                                            <button class="w-full text-center text-primary text-xs font-bold pt-2 border-t border-slate-100 dark:border-slate-800">INVITAR AMIGOS</button>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Screen 2: Sites & Reservations (ID: 6c7a3c55c3c14496a73d799c25fc4417)
+        const SitesScreen = () => {
+            return (
+                <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+                    <TopNav title="Sitios y Reservas" activeTab="sites" />
+                    
+                    <main class="flex-1 max-w-[1200px] mx-auto w-full px-6 py-8">
+                        {/* Hero Section */}
+                        <div class="flex flex-col gap-2 mb-8">
+                            <h1 class="text-slate-900 dark:text-white text-4xl font-extrabold tracking-tight">Sitios y Reservas</h1>
+                            <p class="text-slate-600 dark:text-slate-400 text-lg">Gestiona tus próximas estancias y experiencias gastronómicas en un solo lugar.</p>
+                        </div>
+
+                        {/* Tabs */}
+                        <div class="mb-8 border-b border-slate-200 dark:border-slate-800">
+                            <div class="flex gap-10">
+                                <button class="flex items-center gap-2 border-b-2 border-primary text-primary pb-4 font-bold transition-all">
+                                    <span class="material-symbols-outlined">hotel</span>
+                                    Hoteles
+                                </button>
+                                <button class="flex items-center gap-2 border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-4 font-medium hover:text-slate-700 dark:hover:text-slate-200 transition-all">
+                                    <span class="material-symbols-outlined">restaurant</span>
+                                    Comida y Bebida
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Grid Layout */}
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {/* Hotel Card 1 */}
+                            <div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+                                <div class="relative h-48 w-full bg-cover bg-center" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmqNJ8e7hAQTnmtCoQ20kMPV83v3fT4rphVJ1nYwk5zoqLTlORFoNtquDktSr8NGeucoS0TMZQVGI7EpzFSicJEb1UmUv7SFw8Fdp0n2qtviM3-O96H6m5BOS5C58eFeYn2qZF6pEQr_1zWqThkcXgRmh9cfBFZlRrv8iGH9fX3BEjw4HnPXzMQKpJ8KLa1eN6XKXTZ3ugbO3ez36laLAHZ7h_7d25wNBrJW0TyoHg2BBTghWjgVYXg6WGEg0rl21v15YLA_xE16A")'}}>
+                                    <div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-primary">
+                                        CONFIRMADO
+                                    </div>
+                                </div>
+                                <div class="p-4 flex flex-col gap-2">
+                                    <h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">Hotel Madrid Plaza</h3>
+                                    <div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-xs">calendar_today</span>
+                                            <span>Entrada: 12 Oct, 2024</span>
+                                        </div>
+                                    </div>
+                                    <button class="mt-2 w-full py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined text-sm">qr_code_2</span>
+                                        Ver Ticket
+                                    </button>
+                                </div>
+                            </div>
+                             {/* Hotel Card 2 */}
+                             <div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+                                <div class="relative h-48 w-full bg-cover bg-center" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4TJYFeNirr0CN8KBbm7J2_aY1NVs1D74vJigRce9hFT-_-AXYVWsOYIWYN0ZK-DPFYlbF1DDlficPuxyGrXy4Gjfn3UNPswf60HS65dClWljzDjMtha7nu1VjkHzBL3xcXhQY498IelzrJ7dlocPhfnjgZAjH1ENP_loneCDWfCKmeX6h4xmDhZnGfdnYFTM7NCm-_jBEkYwalNUVcyv97frf6_qZqivRQYc3lKUfW6Z_6mLF3FiRNqA-PiWN1hLNaocGKbwQnFo")'}}>
+                                    <div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg px-2 py-1 text-xs font-bold text-primary">
+                                        CONFIRMADO
+                                    </div>
+                                </div>
+                                <div class="p-4 flex flex-col gap-2">
+                                    <h3 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">Grand Hyatt Barcelona</h3>
+                                    <div class="flex flex-col gap-1 text-slate-500 dark:text-slate-400 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-xs">calendar_today</span>
+                                            <span>Entrada: 15 Oct, 2024</span>
+                                        </div>
+                                    </div>
+                                    <button class="mt-2 w-full py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined text-sm">qr_code_2</span>
+                                        Ver Ticket
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Screen 3: Itinerary (ID: e51ff60e183c4bb6a0a8cb8f58d14fba)
+        const ItineraryScreen = () => {
+            return (
+                <div class="relative flex min-h-screen flex-col">
+                    <TopNav title="Explorador de Viajes" activeTab="itinerary" />
+                    
+                    <main class="flex-1 flex flex-col max-w-[1440px] mx-auto w-full px-4 sm:px-10 py-6 gap-6">
+                        {/* Hero Header Section */}
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm gap-4">
+                            <div class="flex gap-4 items-center">
+                                <div class="size-16 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFT4lh3WTnYDpWbs2Hdf-MISzEoSPs5sLkUqNPs50SQOcnCccLtYXQL98dVnRpIBH7zs96xxDcHTox7mk1KVoQn5tXLOoazZpLSYx5bxjFWBPpMtN22S1dUegeosqvwzUs0hxeCIzR06GsSgZ1qP2jXAF3qcaRj__oM9FT-uZ6cr_KteyQfneUn152lMxbg9otL_lZzBoRxuApPFFROqmbVoZkOcz5eJ1gVZO6_Ild5TCFzVT43nqee8YY6Emb88zHDhqR290ZzBk"/>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Madrid 2024</h1>
+                                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">6 de Oct - 11 de Oct • 2 Viajeros</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 w-full sm:w-auto">
+                                <button class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg font-bold text-sm text-slate-700 dark:text-slate-200">
+                                    <span class="material-symbols-outlined text-lg">share</span>
+                                </button>
+                                <button class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm">
+                                    <span class="material-symbols-outlined text-lg">edit</span> Editar
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Day Selector Tabs */}
+                        <div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 overflow-x-auto no-scrollbar">
+                            <a class="flex flex-col items-center justify-center border-b-[3px] border-primary text-primary pb-3 px-2 font-bold whitespace-nowrap" href="#">Día 1 <span class="text-[10px] font-normal block">6 Oct</span></a>
+                            <a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 2 <span class="text-[10px] font-normal block">7 Oct</span></a>
+                            <a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 px-2 hover:text-slate-700 font-bold whitespace-nowrap" href="#">Día 3 <span class="text-[10px] font-normal block">8 Oct</span></a>
+                        </div>
+
+                        {/* Main Split Content */}
+                        <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                            {/* Left Column: Chronological Timeline */}
+                            <div class="flex flex-col gap-6">
+                                <div class="flex flex-col">
+                                    {/* Activity 1 */}
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col items-center">
+                                            <div class="size-10 rounded-full bg-primary flex items-center justify-center text-white ring-4 ring-primary/20">
+                                                <span class="material-symbols-outlined">coffee</span>
+                                            </div>
+                                            <div class="w-0.5 grow bg-slate-200 dark:bg-slate-700 my-2 min-h-[40px]"></div>
+                                        </div>
+                                        <div class="flex-1 pb-8 pt-1">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Desayuno en Café Central</h4>
+                                                <span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">09:00 AM</span>
+                                            </div>
+                                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Comienza el día con el mejor chocolate con churros.</p>
+                                        </div>
+                                    </div>
+                                    {/* Activity 2 */}
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col items-center">
+                                            <div class="size-10 rounded-full bg-white dark:bg-slate-800 border-2 border-primary flex items-center justify-center text-primary">
+                                                <span class="material-symbols-outlined">museum</span>
+                                            </div>
+                                             <div class="w-0.5 grow bg-slate-200 dark:bg-slate-700 my-2 min-h-[40px]"></div>
+                                        </div>
+                                        <div class="flex-1 pb-8 pt-1">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <h4 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Visita al Museo del Prado</h4>
+                                                <span class="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded">11:00 AM</span>
+                                            </div>
+                                             <p class="text-slate-600 dark:text-slate-400 text-sm mb-3">Reserva recomendada para ver las obras maestras.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column: Map */}
+                            <div class="sticky top-24 hidden lg:block">
+                                <div class="relative w-full aspect-square bg-slate-200 dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg group">
+                                    <div class="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6nPqjuFMm0B4nIpDkizH5SbUT4SPD5g_OjDVSmvSP0jATc_adQ0v2JtRfXqh0xhpcVgZF8VlAi_k7UeBlskDooH58Aauk5l3NxdTC9zbOeCRlDFt_tHY441Wr1KFpA6UJNJAwMIYtPfWhDEr6D9w1Wzgog7ZiWgr4wzs9VrUso7BiRCMdGajioj4FL58fcvgm3I3IWwL2qIDastxDPjGs3W5IC2g8hF23mdAmt2Plwv8wsiLXBGD6bglhilE33YGs4psoDw-OD_k')"}}>
+                                        <div class="absolute inset-0 bg-primary/5"></div>
+                                        <div class="absolute top-[40%] left-[60%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                            <div class="bg-primary text-white p-1 rounded-full shadow-lg ring-4 ring-white">
+                                                <span class="material-symbols-outlined text-lg">museum</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Screen 4: Expenses (ID: 74ca56afd90240cf860e1e9a8a2e84ce)
+        const ExpensesScreen = () => {
+            return (
+                <div class="layout-container flex h-full grow flex-col min-h-screen">
+                    <TopNav title="ViajeApp Gastos" activeTab="expenses" />
+                    
+                    <main class="flex flex-1 flex-col px-4 md:px-10 lg:px-40 py-8 gap-8">
+                        {/* Header Section */}
+                        <div class="flex flex-wrap justify-between items-end gap-4">
+                            <div class="flex flex-col gap-1">
+                                <h1 class="text-slate-900 dark:text-slate-100 text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">Gastos del Viaje</h1>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-normal">Sincroniza y gestiona las cuentas</p>
+                            </div>
+                            <button class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full md:w-auto">
+                                <span class="material-symbols-outlined">add</span>
+                                Añadir Gasto
+                            </button>
+                        </div>
+
+                        {/* Summary Cards */}
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="flex flex-col gap-3 rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary">payments</span>
+                                    </div>
+                                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Total Gastado</p>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <p class="text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-extrabold">€2.450,00</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-3 rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-emerald-600">account_balance_wallet</span>
+                                    </div>
+                                    <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Tu Saldo Actual</p>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <p class="text-emerald-600 dark:text-emerald-400 tracking-tight text-3xl font-extrabold">+€125,50</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Expenses List */}
+                        <section class="w-full flex flex-col gap-6">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">receipt_long</span>
+                                    Gastos Recientes
+                                </h2>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm overflow-x-auto">
+                                <table class="w-full text-left min-w-[600px]">
+                                    <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                        <tr>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Concepto</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Categoría</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pagado por</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Importe</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="size-10 bg-orange-100 dark:bg-orange-500/10 text-orange-600 rounded-lg flex items-center justify-center">
+                                                        <span class="material-symbols-outlined">restaurant</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-slate-900 dark:text-slate-100 font-bold">Cena Trattoria Luzzi</p>
+                                                        <p class="text-slate-500 dark:text-slate-400 text-xs">Ayer, 21:30</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Comida</span>
+                                            </td>
+                                            <td class="px-6 py-4">Juan</td>
+                                            <td class="px-6 py-4 text-right font-bold">€112,00</td>
+                                        </tr>
+                                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="size-10 bg-blue-100 dark:bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center">
+                                                        <span class="material-symbols-outlined">directions_car</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-slate-900 dark:text-slate-100 font-bold">Alquiler Coche</p>
+                                                        <p class="text-slate-500 dark:text-slate-400 text-xs">15 Oct</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Transporte</span>
+                                            </td>
+                                            <td class="px-6 py-4">Tú</td>
+                                            <td class="px-6 py-4 text-right font-bold">€245,00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- App Component ---
+        const App = () => {
+            return (
+                <Routes>
+                    <Route path="/" element={<DashboardScreen />} />
+                    <Route path="/sites" element={<SitesScreen />} />
+                    <Route path="/itinerary" element={<ItineraryScreen />} />
+                    <Route path="/expenses" element={<ExpensesScreen />} />
+                </Routes>
+            );
+        };
+
+        // Render App
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <MemoryRouter>
+                <App />
+            </MemoryRouter>
+        );
+    </script>
+</body>
+</html>

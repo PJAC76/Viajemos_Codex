@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Saved Places - Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-slate-900 shadow-xl overflow-x-hidden">
+<!-- Header -->
+<div class="flex items-center bg-white dark:bg-slate-900 p-4 pb-2 justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Sitios Guardados</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="bg-white dark:bg-slate-900">
+<div class="flex border-b border-slate-100 dark:border-slate-800 px-4 justify-between">
+<a class="flex flex-col items-center justify-center border-b-2 border-primary text-primary pb-3 pt-4 flex-1" href="#">
+<p class="text-sm font-bold tracking-wide uppercase text-[11px]">HOTELES</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-3 pt-4 flex-1 hover:text-primary transition-colors" href="#">
+<p class="text-sm font-bold tracking-wide uppercase text-[11px]">COMIDA Y BEBIDA</p>
+</a>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<!-- Card 1: Reserved Hotel -->
+<div class="flex flex-col rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm overflow-hidden group">
+<div class="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover" data-alt="Luxury hotel exterior with pool and palm trees" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCY0DjogBnCD8z4hbV0QRajHruyDSwLf2cpo4oTZJo7fkSxgw2xhhCXYImsqk3IMBZYG4pmcRfE6JU6_yg7U2yIrAsCPbGVc6MJsdPAwaV1Wbhg2QbS77MQFimUFPDk9gm5USZZe1QuIq-bYUKvTKoKQlKfq-WvK8rOm77uvWR6oRJggXVZKxqmZEQ1yNoGf4SewlIJxcJPI9PDnx2FHGlvc1x-YY_kqZAR27HvaTrXKJM8sHsYlZ7xd4a0ywDXvB7ewj2tIoroErk");'>
+<div class="absolute top-3 left-3">
+<span class="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">RESERVADO</span>
+</div>
+<div class="absolute top-3 right-3">
+<button class="bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1.5 rounded-full text-rose-500 shadow-sm">
+<span class="material-symbols-outlined text-[20px] fill-current">favorite</span>
+</button>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">The Grand Plaza Hotel</p>
+<div class="flex items-center gap-1 mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<p class="text-xs font-normal">123 Luxury Way, Downtown</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">
+<span class="material-symbols-outlined text-xs">star</span>
+<span>4.8</span>
+</div>
+</div>
+<!-- Booking Details (Expanded State/Info) -->
+<div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-4">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Nº de Conf.</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">#GP-88210</span>
+</div>
+<div class="flex flex-col border-l border-slate-200 dark:border-slate-700 pl-4">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Entrada</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Oct 14, 3:00 PM</span>
+</div>
+</div>
+<button class="mt-2 w-full flex items-center justify-center gap-2 rounded-lg bg-primary h-10 px-4 text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98]">
+<span>Ver Entrada Digital</span>
+<span class="material-symbols-outlined text-sm">Ver Entrada Digital</span>
+</button>
+</div>
+</div>
+<!-- Card 2: To Visit Restaurant -->
+<div class="flex flex-col rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm overflow-hidden group">
+<div class="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover" data-alt="Modern upscale bistro interior with warm lighting" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBGSbb8CLMqn-N_jvLIVq6fzZ5bufgthdF65UNBPcuc3My72MPvCtspCUTnYRo9dsiH6IqdIqSmyOK_sG6XL4qh5G8_0G6Rf5YRSUQFM--9Xhvgdm_nf_JvIdwAQi8KTKCVE-9kWAuSBFA8lTwA6RCHu7QMnwvKH3sr9M_3ZxCMgqtW2zhVUmiB9DbvW6G1MXNBfAHtyWRwBdJ7fHJw5I--ibl4cF3HHvTrJW_XrAxtElOprNj9xFmq4f4CF_IRcXdbP3Upg2-P7qo");'>
+<div class="absolute top-3 left-3">
+<span class="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">POR VISITAR</span>
+</div>
+<div class="absolute top-3 right-3">
+<button class="bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1.5 rounded-full text-rose-500 shadow-sm">
+<span class="material-symbols-outlined text-[20px] fill-current">favorite</span>
+</button>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Sunset Bistro</p>
+<div class="flex items-center gap-1 mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<p class="text-xs font-normal">456 Ocean Drive, Coastal</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">
+<span class="material-symbols-outlined text-xs">star</span>
+<span>4.5</span>
+</div>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium italic">Guardado en "Ruta Gastronómica de Verano"</p>
+<button class="flex items-center justify-center rounded-lg bg-primary/10 text-primary h-9 px-6 text-sm font-bold hover:bg-primary/20 transition-all">Reservar Mesa</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Reserved Activity/Food -->
+<div class="flex flex-col rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm overflow-hidden group">
+<div class="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover" data-alt="Japanese sushi chef preparing fresh rolls" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuABH15emNFMKER9Gar1BsUUQT69TClpD26qjSUBC8kpU7GuYITFOHLjtHAyijGq_Kggb10t0HjXDSv8UQHjPYfdX5jZCsEkJsborSTOspoZeGrvw0Xgs7wJuk0KuOmN3U6Gb4pkziNO9FzRbQOnlSOgGPlAC_sgO_iCYbqG3wmmPzJ9YyhDwJF2Tk8IFf4X5TD3Tse6mv4o-s6HlmUcJUg3RFSYO-a4dq94VS_O_pRa-itbA4H-Rf7-zJdzezy6OsUAmDFVi2LBo3M");'>
+<div class="absolute top-3 left-3">
+<span class="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">RESERVADO</span>
+</div>
+<div class="absolute top-3 right-3">
+<button class="bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1.5 rounded-full text-rose-500 shadow-sm">
+<span class="material-symbols-outlined text-[20px] fill-current">favorite</span>
+</button>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Omaske House</p>
+<div class="flex items-center gap-1 mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<p class="text-xs font-normal">789 Neon District</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">
+<span class="material-symbols-outlined text-xs">star</span>
+<span>4.9</span>
+</div>
+</div>
+<div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-4">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Confirmación</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">#RES-4432</span>
+</div>
+<div class="flex flex-col border-l border-slate-200 dark:border-slate-700 pl-4">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Hora</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Oct 16, 7:30 PM</span>
+</div>
+</div>
+<button class="mt-2 w-full flex items-center justify-center gap-2 rounded-lg bg-primary h-10 px-4 text-white text-sm font-bold shadow-lg shadow-primary/20 transition-all">
+<span>Ver Entrada Digital</span>
+</button>
+</div>
+</div>
+<div class="h-10"></div> <!-- Spacer -->
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="flex border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-6 pt-2 sticky bottom-0 w-full shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">explore</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Explorar</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-current">favorite</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Guardado</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Reservas</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Perfil</p>
+</a>
+</div>
+</div>
+</body></html>

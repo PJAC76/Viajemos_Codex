@@ -1,0 +1,5 @@
+export function registerServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    void navigator.serviceWorker.register("/sw.js");
+  }
+}

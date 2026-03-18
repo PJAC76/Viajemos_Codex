@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shared Expense Manager - Group Trip</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Header Navigation -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 cursor-pointer">arrow_back</span>
+<h1 class="text-lg font-bold tracking-tight">Viaje de Verano: Bali 2024</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">group</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto px-4 pt-6 space-y-6">
+<!-- Summary Cards -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-primary/10 dark:bg-primary/20 p-5 rounded-xl border border-primary/20">
+<p class="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Total Spent</p>
+<p class="text-2xl font-extrabold text-slate-900 dark:text-white">$1,450.00</p>
+<p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1"><span class="material-symbols-outlined text-xs">trending_up</span> +12% desde ayer</p>
+</div>
+<div class="bg-emerald-50 dark:bg-emerald-900/20 p-5 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+<p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">Your Balance</p>
+<p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">+$52.50</p>
+<p class="text-[10px] text-slate-500 mt-2 uppercase tracking-tighter">You are owed</p>
+</div>
+</div>
+<!-- Settling Up Section -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-base font-bold">Ajustando Cuentas</h2>
+<button class="text-xs font-semibold text-primary">Ver Todo</button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a friend named John" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCocfDN088IwFe1zQguG-iNqpSC3-NiBaRkVFOMn8E80U9ww-3wFq-nJLEOHItldMvQa0yel1o56122dAdN_wmAMTQ30rd-lNr-NEqbgZ0ntBcl2Nba8nlUlq2VcE9NW2rFOJo028mU-b1dNRS96H_9Cb857Ven_CpXbxwIQnrJYDuNvm5fgEJs9M9fJfar39ikyoZEY4uXt9g9HBOuasGs6qv3t8VywwqM42_Qt9dzwJlK79FvK631JgPyDoMTl3aoV74TLN3kzho"/>
+</div>
+<div>
+<p class="text-sm font-bold">John te debe <span class="text-emerald-600">$32.50</span></p>
+<p class="text-xs text-slate-500">Por el almuerzo en el club de playa</p>
+</div>
+</div>
+<button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">Recordar</button>
+</div>
+<div class="h-px bg-slate-100 dark:bg-slate-800 mx-4"></div>
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a friend named Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAemB7ctqoOE5ty4aCv4YvmL16M4YHAhhu8gmfAev2NhcPk1Z0MzVQlfWlFsDVI3q6j1_QkibLDZQcS_QbCYghADxSwj6hNiVUGF-u9WqG6kT2p6c6y-FdmRrvA_iMA9A5GRD5xiGsUEBxIo4kwlQD5JRYcBwwzHVpvxhzxt8AXM9bd3kPakRsQMzLARYds9UMagHVP_zGp4okAUDvjVCSheE67K2xqFrmkk1ON9pDMqR_tWrmOf-l9yF-N9gKK3UTvJWjb-W5CtOc"/>
+</div>
+<div>
+<p class="text-sm font-bold">Sarah te debe <span class="text-emerald-600">$20.00</span></p>
+<p class="text-xs text-slate-500">Por el depósito de la villa</p>
+</div>
+</div>
+<button class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Recordar</button>
+</div>
+</div>
+</section>
+<!-- Recent Expenses List -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-base font-bold">Gastos Recientes</h2>
+<button class="text-xs font-semibold text-primary">Filtrar</button>
+</div>
+<div class="space-y-3">
+<!-- Expense Item -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:shadow-sm transition-shadow">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">restaurant</span>
+</div>
+<div>
+<p class="text-sm font-bold">Cena en La Favela</p>
+<p class="text-xs text-slate-500">Pagado por <span class="font-semibold text-slate-700 dark:text-slate-300">ti</span> • Dividido equitativamente</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">$120.00</p>
+<p class="text-[10px] text-emerald-600 font-semibold">Prestaste $80.00</p>
+</div>
+</div>
+<!-- Expense Item -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-600">directions_car</span>
+</div>
+<div>
+<p class="text-sm font-bold">Traslado al Aeropuerto</p>
+<p class="text-xs text-slate-500">Pagado por <span class="font-semibold text-slate-700 dark:text-slate-300">Mike</span> • Dividido entre 4</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">$45.00</p>
+<p class="text-[10px] text-slate-400 font-semibold">Tu parte $11.25</p>
+</div>
+</div>
+<!-- Expense Item -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-purple-600">local_bar</span>
+</div>
+<div>
+<p class="text-sm font-bold">Copas al Atardecer</p>
+<p class="text-xs text-slate-500">Pagado por <span class="font-semibold text-slate-700 dark:text-slate-300">Sarah</span> • Dividido contigo</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">$68.00</p>
+<p class="text-[10px] text-slate-400 font-semibold">Tu parte $34.00</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 z-50">
+<div class="max-w-md mx-auto flex h-16">
+<a class="flex-1 flex flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">receipt_long</span>
+<span class="text-[10px] font-bold">Gastos</span>
+</a>
+<a class="flex-1 flex flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Saldos</span>
+</a>
+<a class="flex-1 flex flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-[10px] font-medium">Liquidar</span>
+</a>
+<a class="flex-1 flex flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-medium">Actividad</span>
+</a>
+</div>
+</nav>
+</body></html>

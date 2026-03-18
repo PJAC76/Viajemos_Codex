@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard del Viaje - Aventura en Tokio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">travel_explore</span>
+</div>
+<span class="text-xl font-bold tracking-tight">TripDash</span>
+</div>
+<div class="flex items-center gap-3 p-3 mb-6 bg-slate-50 dark:bg-slate-800 rounded-xl">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Foto de perfil de Alex García" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYX1TvDMyOeS9AEYrlcAc6_iXQg1ZdHSs0BO_Km3VKNtHffLbHhVz7EwzjDUnssRvGr71WFe3Vim1Dd13AKDeUfGs34OmVNs4hk9ONCL8oMF9vJdpKycoS-Re6FU7JuaUE7crBZRCkTtuDvdJkRG7h0dZcSg-sSy030V6Mw6i9B_U9gVGQVGgaYD7vEfzSC5kFMwFIlPDQbKs0m7_YouN7g_coHLrVA6WHKETGRtMgDJmeGMfzFuDw3WabiMQoBNpuWFGI3GFYRsM')"></div>
+<div class="flex flex-col">
+<h1 class="text-sm font-semibold">Alex García</h1>
+<p class="text-xs text-slate-500">Viajero Premium</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="text-sm font-medium">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">public</span>
+<span class="text-sm font-medium">Mis Viajes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span class="text-sm font-medium">Explorar</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+<span class="text-sm font-medium">Mensajes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6">
+<button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                    Cerrar Sesión
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<!-- Hero Section -->
+<header class="relative h-72 w-full">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Vista panorámica de la ciudad de Tokio con luces de neón" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgG8ooQtbMPrK9FGItDB3yazPyySOHdx7IXTIHIMBGvon41JaMogT9e5kPtN1iAr6yL6-X6zz6i4Ra6xzcCwVITW2jTtC7aAkOnsgLWcg5JHEyvFn-HtN7z-cEDHEElHTjJ_pk3lCCLxTcy0lkQbZKREteKZL2IN0nx36UATcS2yaHoX81YbnIfA1Wj7eBdu-kintY_miuuJDndi4wGZnSs4HwdFbYAfsdX5vDD63l9-FiW53uWa2voGVhIak9EpMSfUnvN50EOp8')">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 p-8 w-full max-w-6xl mx-auto flex justify-between items-end">
+<div>
+<h2 class="text-white text-4xl font-extrabold tracking-tight mb-2">Aventura en Tokio</h2>
+<div class="flex items-center gap-2 text-white/90">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<p class="text-sm font-medium">15 de Octubre - 25 de Octubre • 10 días de cultura y neón</p>
+</div>
+</div>
+<button class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all border border-white/30">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                        Editar Viaje
+                    </button>
+</div>
+</header>
+<div class="max-w-6xl mx-auto px-8 py-8">
+<!-- Tabs -->
+<div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 mb-8">
+<a class="border-b-2 border-primary text-primary pb-4 px-1 text-sm font-bold" href="#">Resumen</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors" href="#">Aventureros</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors" href="#">Itinerario</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-4 px-1 text-sm font-bold transition-colors" href="#">Gastos</a>
+</div>
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-slate-500">Días Restantes</p>
+<span class="material-symbols-outlined text-primary">schedule</span>
+</div>
+<p class="text-3xl font-bold">4</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-slate-500">Paradas Visitadas</p>
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<p class="text-3xl font-bold">12 / 20</p>
+<div class="mt-3 w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 60%"></div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-slate-500">Presupuesto Gastado</p>
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<p class="text-3xl font-bold">65%</p>
+<p class="text-xs text-slate-400 mt-1">Estás dentro del límite planeado</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Main Itinerary Area -->
+<div class="lg:col-span-2 space-y-6">
+<h3 class="text-xl font-bold mb-4">Próximas Paradas</h3>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<div class="p-4 flex gap-4">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0" data-alt="Templo Senso-ji en Asakusa, Tokio" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCATiBp53O89pgwXKavpQhpUL1iX17H50IUfNKLECVgg0KVAKR2Vgbkj7AqfwaXv0_T9p8nsWKm6sxlChdT3i68a29noJgzz4AMw5xnE658rNQ-nkpMPzVdDywWlTE_nlRKL8scJvvWbkHP9AiWfRGu4kRp2sl5OvSZ-SoohF8XFADkHea5ySJVKzVz2kDdWhzuPxTS5FDmef9lxrWRYSOp1kvGqsMlENLInSId9BENGaJbVfdYVDVLqrlKCk0aliFK8glzwq-HfJc')"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">Mañana • 09:00</span>
+<h4 class="text-lg font-bold mt-1">Templo Senso-ji</h4>
+<p class="text-sm text-slate-500">Asakusa, Taito City</p>
+</div>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<div class="mt-3 flex gap-2">
+<span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Cultura</span>
+<span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Gratis</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<div class="p-4 flex gap-4">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0" data-alt="Cruce de Shibuya con mucha gente y luces" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmQv-KYBxCshMiFRAtolsqa1pvThLnFUZABbkN2zrZBjjoAZr9_ok0t9FPWaBn-btuG5hPJH31fZ0hUzueGoyg_b9EL7D-sENvDrEdGol0y4KyD_D2TOOaf1oDIPw4EQYMOHAK66txFkCPdvR3O6cjV5dZM-dE0N_M7qOygjtSU7FBaeOY_ImIWXnA7f4Ld6efTCEl7k7LeOFqMSkv6HWxpy8JPsVTYf3sG8lsrRTd4lrfeEvlcwZ4jeGCe3BUplyZdz6T-w7rNsg')"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Mañana • 14:30</span>
+<h4 class="text-lg font-bold mt-1">Cruce de Shibuya</h4>
+<p class="text-sm text-slate-500">Shibuya City</p>
+</div>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<div class="mt-3 flex gap-2">
+<span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Compras</span>
+<span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Icónico</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 hover:text-primary hover:border-primary transition-all font-semibold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add_circle</span>
+                            Añadir parada al itinerario
+                        </button>
+</div>
+<!-- Sidebar Area -->
+<div class="space-y-8">
+<!-- Adventurers -->
+<section>
+<h3 class="text-lg font-bold mb-4">Aventureros (4)</h3>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Alex García" class="size-8 rounded-full" data-alt="Foto de perfil de Alex García" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBL_kWWsN6Kj8-YVOF2ThqBz-ywb_0m-Kr-tREZVc6kbOXlPE_NdFaw06XHPWbNvGRdVWBjBqL7vgCl0WcpBdm_Q7H3gFylHQIwpzcLBgp3xpnb5QRW4UadR3mV97gvmpAylJlTcykfTbybsdVtj7nbTUTMQYJ2LZk4v4xKHXixo0vrBUVGBLW9WGIrs7okT92H8F5bFOOdbfaky0dwu-y5udZyX6PIZwJb6IRSPZTR9SAhirykpL4J6_3fgP7XDAEYetDHLS5_-RY"/>
+<span class="text-sm font-semibold">Alex G. (Tú)</span>
+</div>
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">LÍDER</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Elena M." class="size-8 rounded-full" data-alt="Foto de perfil de Elena Martínez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIwqkfCL1AhkMBuMmxUBa7kmKZ_U8OjZmaHDKneiLx_zdaSXspl8yyOk3JdoFq0c3Nx5S6fwvaHyU75OrtFwZAEa2kBoqOzXTsIuU95_nOlJ1c7Me6JrvYatXKHy3w7jtJajbLIxPGyBwMUFyYHOusD94Qbhj8BgHtWL-183kQhz0bBkuBBDpI5hwhzEa0ZlqSjq6Pc4kbW7zx--Uu89Y7csPWCJoXpjciacHlIDtEgxR-MC78Z8pzKqEAehv9r8Gadpt_E5uIkk8"/>
+<span class="text-sm font-medium">Elena M.</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">chat</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Javier R." class="size-8 rounded-full" data-alt="Foto de perfil de Javier Ruiz" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6qYcXjM4PvlejSGoFTCQ1lqACZpE8W4WSkl6pBFZ6FnGFPjArS-AJSvPjQcloeIKa9eEkJNZ7Bm1dxu3s5TTFfAF_uMhLyYxUT8z1Rkxkwxn40qBwD4ui9osxTrOVer0g3VvTXmE140UmvUBNPx_7QUS4N-PnAwJ7hQ31p3MsFn5nmlQfWM69kqiIq27v1XePZ7tcMpPA4g030f6VlZI47z_SyZKS6zDqc-NRsjsdiwabuGDfnEaO0AYVzYEGWdiabgLUSTmFjfw"/>
+<span class="text-sm font-medium">Javier R.</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">chat</span>
+</div>
+<button class="w-full text-center text-primary text-xs font-bold pt-2 border-t border-slate-100 dark:border-slate-800">INVITAR AMIGOS</button>
+</div>
+</section>
+<!-- Map Preview -->
+<section>
+<h3 class="text-lg font-bold mb-4">Mapa del Viaje</h3>
+<div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm aspect-video bg-slate-200">
+<img class="w-full h-full object-cover grayscale opacity-80" data-alt="Mapa abstracto de las calles de Tokio" data-location="Tokyo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACAS77XMzKDQGF0jJgHKAsNtI5-JhOa5pOAvzP7G9RqYs7r7NIsIucq4Ah0KYPRaQO1N2eoPe9zEo8Y5SS8TQLuosJ1klGjcH87-votdw6IekF9PVJ96ZawMI88mXp7PbfBSIJiAoxK9iPih8UPCQAL-im6FDCC97obJrFxpwYgGOuwG9ObsovWAYnSjRSVJy0DqCAbgYJZEfWHQJZZ53Gs0p8GT22dSK3ZjSoW1TayWLNhRYJUzVrqXJIc05H0XPQcM-NsWDQhEU"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary text-white p-2 rounded-full shadow-lg ring-4 ring-primary/20">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+</div>
+<div class="absolute bottom-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg text-[10px] font-bold">
+                                    TOKIO, JAPÓN
+                                </div>
+</div>
+</section>
+<!-- Quick Expenses -->
+<section>
+<h3 class="text-lg font-bold mb-4">Últimos Gastos</h3>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 divide-y divide-slate-100 dark:divide-slate-800">
+<div class="py-2 flex justify-between items-center">
+<div>
+<p class="text-sm font-bold">Ichiran Ramen</p>
+<p class="text-[10px] text-slate-500">Cena • Ayer</p>
+</div>
+<span class="font-bold text-red-500">-¥2,400</span>
+</div>
+<div class="py-2 flex justify-between items-center">
+<div>
+<p class="text-sm font-bold">Japan Rail Pass</p>
+<p class="text-[10px] text-slate-500">Transporte • Hace 2 días</p>
+</div>
+<span class="font-bold text-red-500">-¥50,000</span>
+</div>
+<button class="w-full text-center text-primary text-xs font-bold pt-3">VER TODO EL PRESUPUESTO</button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

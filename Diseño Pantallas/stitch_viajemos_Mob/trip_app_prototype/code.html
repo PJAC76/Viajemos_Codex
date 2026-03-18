@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trip App Prototype</title>
+    
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+
+    <!-- React and Router Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate } = ReactRouterDOM;
+
+        // --- Layout & Shared Components ---
+        
+        const BottomNav = ({ currentPath }) => {
+            return (
+                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                    <div className="max-w-md mx-auto flex h-16 px-4 pb-2 pt-2">
+                        <Link to="/" className={`flex flex-1 flex-col items-center justify-center gap-1 ${currentPath === '/' ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <div className="flex h-8 items-center justify-center">
+                                <span className={`material-symbols-outlined ${currentPath === '/' ? 'fill-1' : ''}`}>home</span>
+                            </div>
+                            <p className="text-[10px] font-bold leading-normal tracking-wide uppercase">Inicio</p>
+                        </Link>
+                        <Link to="/saved" className={`flex flex-1 flex-col items-center justify-center gap-1 ${currentPath === '/saved' ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <div className="flex h-8 items-center justify-center">
+                                <span className={`material-symbols-outlined ${currentPath === '/saved' ? 'fill-1' : ''}`}>favorite</span>
+                            </div>
+                            <p className="text-[10px] font-bold leading-normal tracking-wide uppercase">Guardado</p>
+                        </Link>
+                        <Link to="/itinerary" className={`flex flex-1 flex-col items-center justify-center gap-1 ${currentPath === '/itinerary' ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <div className="flex h-8 items-center justify-center">
+                                <span className={`material-symbols-outlined ${currentPath === '/itinerary' ? 'fill-1' : ''}`}>map</span>
+                            </div>
+                            <p className="text-[10px] font-bold leading-normal tracking-wide uppercase">Itinerario</p>
+                        </Link>
+                        <Link to="/expenses" className={`flex flex-1 flex-col items-center justify-center gap-1 ${currentPath === '/expenses' ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <div className="flex h-8 items-center justify-center">
+                                <span className={`material-symbols-outlined ${currentPath === '/expenses' ? 'fill-1' : ''}`}>receipt_long</span>
+                            </div>
+                            <p className="text-[10px] font-bold leading-normal tracking-wide uppercase">Gastos</p>
+                        </Link>
+                    </div>
+                </div>
+            );
+        };
+
+        const TopHeader = ({ title, showBack = true, actionIcon, actionIcon2 }) => {
+            const navigate = useNavigate();
+            return (
+                <div className="flex items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 justify-between">
+                    <div className="flex items-center gap-3">
+                        {showBack && (
+                            <div onClick={() => navigate(-1)} className="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+                                <span className="material-symbols-outlined">arrow_back</span>
+                            </div>
+                        )}
+                        <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1">{title}</h2>
+                    </div>
+                    <div className="flex items-center gap-2 justify-end">
+                        {actionIcon && (
+                            <button className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors">
+                                <span className="material-symbols-outlined">{actionIcon}</span>
+                            </button>
+                        )}
+                        {actionIcon2 && (
+                            <button className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors">
+                                <span className="material-symbols-outlined">{actionIcon2}</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const MainContainer = ({ children }) => (
+            <div className="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-slate-900 shadow-xl overflow-x-hidden">
+                {children}
+            </div>
+        );
+
+        // --- Screen 1: Dashboard ---
+        const Dashboard = () => {
+            return (
+                <MainContainer>
+                    <TopHeader title="Viaje a Tokio" actionIcon="more_horiz" />
+                    
+                    <div className="overflow-y-auto pb-24">
+                        <div className="@container">
+                            <div className="@[480px]:px-4 @[480px]:py-4">
+                                <div className="relative bg-cover bg-center flex flex-col justify-end overflow-hidden h-64 @[480px]:rounded-xl" style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuA25Uj2q3S-B5kW59SqcMQcILlNbW_k7d6XptnQaB3ULeQdRYddwsaVUZn5eJKc_jrgqX2gA-hHE-D3to3B7pfF9ziHi-oLl6oFQLZdOlSQIW0ch8krmYWntGx9viauXEchXgFbdyQ7D2Xk8Fh6SrputTZH4UfhDh1tUyGd1rd7jjOoUcvYlzRUr7-KlTsTGo4IzzaucfTB-jyx08T1B7TD0AosjD9A9eXdyurPPM4beMVMNUYuKVomq18o66Zy_7muxk15i3jWh4Y")'}}>
+                                    <div className="flex flex-col p-6">
+                                        <h1 className="text-white text-3xl font-extrabold leading-tight">Tokio 2024</h1>
+                                        <p className="text-slate-200 text-sm font-medium">12 oct - 20 oct • Japón</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col p-4 bg-white dark:bg-slate-900 mx-4 mt-2 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex flex-col">
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Viaje en Grupo</p>
+                                    <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">5 Adventurers</p>
+                                </div>
+                                <div className="flex items-center -space-x-3">
+                                    <img alt="Member 1" className="size-10 rounded-full border-2 border-white dark:border-slate-900 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPu0YgaPbKw7ZCKGR9jkbEY-HXqv_PlVaoZ0SR6hCOUQ5a5vOnplG1oDoVzFKzkqvyZE97luuZdscQWwOd5HK1OvtIfoidUnj8uehQhfHKwapaGdk822EBTllcBtejNqsPnDGayCQMkYAq5WbQJC_pbl1H0aS-sx9oxeF5OkgM1-TDcLML8avS4psrLZMksA8EHWV0RGcpYa2gGHjrwEYQ0PNqXMHUsW9TFKjB-i-SoeDvjdyDitOpBpAldqe6ZfmSS_ibng9YTA8" />
+                                    <img alt="Member 2" className="size-10 rounded-full border-2 border-white dark:border-slate-900 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqkDDLdfw3p_F9eCAgMmCqalMkq_Jb2UaHpwCo6033_tCdk_qW20JnxTWgoq2E8Zbzgc8yvZ1xENUV3HdttLQIYbAx1vuDVwd_EydSblK3JZ62xUJcyrXQyS6xeG-JGylNBmofUlT133KzeExlVmH7OpdUrzx-y0so99wNpIVFsQr4To3NCA4J0a4EvS_rH8pti8pf6jtAFXPm7UbTjej5RQA3ZcaXfZ5oIdCr-vFnXA6vol3uvwIP6fZ5Nb74peBeedKWkMUc388" />
+                                    <img alt="Member 3" className="size-10 rounded-full border-2 border-white dark:border-slate-900 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTGS2ryVjvYwOcIFVt2OlMomk4llhX3RnATJLHdOpYa1UxB8ng-E56VVVgon16XRcagLKSp-TXSJnYrKs3qrduBdIR7t28gWSLDIMI2PthROwQW841DIsyUi_zeeyaijms5eW-A9g8un2ibULWOsZsC3yO-f3hJjjp64SclN8HLiOig2PVRHMFQJ2oWXM27J2yJgRPOMLutxSO3ljNj69khQbeXKMDa_o9o8K_5vpa4bqS1KuOk7HeKteYHrJPkxboSx1cgJm8T2A" />
+                                    <div className="size-10 rounded-full border-2 border-white dark:border-slate-900 bg-primary flex items-center justify-center text-white text-xs font-bold">+2</div>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button className="flex-1 flex items-center justify-center gap-2 rounded-lg h-11 bg-primary/10 text-primary font-bold text-sm transition-colors hover:bg-primary/20"><span className="material-symbols-outlined text-[20px]">edit</span> Editar</button>
+                                <button className="flex-1 flex items-center justify-center gap-2 rounded-lg h-11 bg-primary text-white font-bold text-sm shadow-md shadow-primary/20 transition-transform active:scale-95"><span className="material-symbols-outlined text-[20px]">person_add</span> Invitar</button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-3 p-4">
+                            <Link to="/itinerary" className="flex flex-col items-center gap-2 group">
+                                <div className="size-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:bg-primary/5 transition-colors">
+                                    <span className="material-symbols-outlined text-2xl">calendar_month</span>
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Itinerario</span>
+                            </Link>
+                            <Link to="/saved" className="flex flex-col items-center gap-2 group">
+                                <div className="size-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:bg-primary/5 transition-colors">
+                                    <span className="material-symbols-outlined text-2xl">confirmation_number</span>
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Reservas</span>
+                            </Link>
+                            <Link to="/expenses" className="flex flex-col items-center gap-2 group">
+                                <div className="size-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:bg-primary/5 transition-colors">
+                                    <span className="material-symbols-outlined text-2xl">payments</span>
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Gastos</span>
+                            </Link>
+                            <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                                <div className="size-14 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:bg-primary/5 transition-colors">
+                                    <span className="material-symbols-outlined text-2xl">map</span>
+                                </div>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Mapa</span>
+                            </div>
+                        </div>
+
+                        <div className="px-4 py-2">
+                            <h3 className="text-slate-900 dark:text-slate-100 text-lg font-bold mb-3">Siguiente Parada</h3>
+                            <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 flex cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <div className="w-24 h-24 shrink-0 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCnkbq-tGIf4jZ3vJOPGCx_VvxpWNW-Q1rD6mUiU8IY9nPLE21rzaDyB4zG3DFLZCrMOyAvML-yNQxW3ok5DEeqSATSPj_EnvJzipAN5zzupKZ4386mtgXSFf5uwAOcVv0HoH_aQJgJGgt5liaOsGToup1Rd41gfTReJKRHmd42YqFfjZ4JuF5qCEora5cnyxL5Wn5KsdVfb-XxwKefITXd5d29pFXBlCnGgAx0-1lzUZTEu6FjYffGfI7H-D4IHPCWf2fKk2ku4mQ')"}}></div>
+                                <div className="p-3 flex flex-col justify-center flex-1">
+                                    <div className="flex items-center gap-1 text-primary mb-1">
+                                        <span className="material-symbols-outlined text-sm">schedule</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">HOY, 2:00 PM</span>
+                                    </div>
+                                    <p className="text-slate-900 dark:text-slate-100 font-bold text-base leading-tight">Visita al Templo Senso-ji</p>
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Asakusa, Taito City</p>
+                                </div>
+                                <div className="ml-auto flex items-center pr-4">
+                                    <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <BottomNav currentPath="/" />
+                </MainContainer>
+            );
+        };
+
+        // --- Screen 2: Saved Places ---
+        const SavedPlaces = () => {
+            const [activeTab, setActiveTab] = useState('hoteles');
+            return (
+                <MainContainer>
+                    <TopHeader title="Sitios Guardados" actionIcon="search" />
+                    
+                    <div className="bg-white dark:bg-slate-900 sticky top-16 z-10">
+                        <div className="flex border-b border-slate-100 dark:border-slate-800 px-4 justify-between">
+                            <button onClick={() => setActiveTab('hoteles')} className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 flex-1 transition-colors ${activeTab === 'hoteles' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}>
+                                <p className="text-sm font-bold tracking-wide uppercase text-[11px]">HOTELES</p>
+                            </button>
+                            <button onClick={() => setActiveTab('comida')} className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 flex-1 transition-colors ${activeTab === 'comida' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}>
+                                <p className="text-sm font-bold tracking-wide uppercase text-[11px]">COMIDA Y BEBIDA</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+                        <div className="flex flex-col rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm overflow-hidden group">
+                            <div className="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCY0DjogBnCD8z4hbV0QRajHruyDSwLf2cpo4oTZJo7fkSxgw2xhhCXYImsqk3IMBZYG4pmcRfE6JU6_yg7U2yIrAsCPbGVc6MJsdPAwaV1Wbhg2QbS77MQFimUFPDk9gm5USZZe1QuIq-bYUKvTKoKQlKfq-WvK8rOm77uvWR6oRJggXVZKxqmZEQ1yNoGf4SewlIJxcJPI9PDnx2FHGlvc1x-YY_kqZAR27HvaTrXKJM8sHsYlZ7xd4a0ywDXvB7ewj2tIoroErk")'}}>
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">RESERVADO</span>
+                                </div>
+                                <div className="absolute top-3 right-3">
+                                    <button className="bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1.5 rounded-full text-rose-500 shadow-sm">
+                                        <span className="material-symbols-outlined text-[20px] fill-1">favorite</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="p-4 flex flex-col gap-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">The Grand Plaza Hotel</p>
+                                        <div className="flex items-center gap-1 mt-1 text-slate-500 dark:text-slate-400">
+                                            <span className="material-symbols-outlined text-sm">location_on</span>
+                                            <p className="text-xs font-normal">123 Luxury Way, Downtown</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">
+                                        <span className="material-symbols-outlined text-xs">star</span>
+                                        <span>4.8</span>
+                                    </div>
+                                </div>
+                                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Nº de Conf.</span>
+                                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">#GP-88210</span>
+                                    </div>
+                                    <div className="flex flex-col border-l border-slate-200 dark:border-slate-700 pl-4">
+                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Entrada</span>
+                                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Oct 14, 3:00 PM</span>
+                                    </div>
+                                </div>
+                                <button className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg bg-primary h-10 px-4 text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98]">
+                                    <span>Ver Entrada Digital</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm overflow-hidden group">
+                            <div className="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBGSbb8CLMqn-N_jvLIVq6fzZ5bufgthdF65UNBPcuc3My72MPvCtspCUTnYRo9dsiH6IqdIqSmyOK_sG6XL4qh5G8_0G6Rf5YRSUQFM--9Xhvgdm_nf_JvIdwAQi8KTKCVE-9kWAuSBFA8lTwA6RCHu7QMnwvKH3sr9M_3ZxCMgqtW2zhVUmiB9DbvW6G1MXNBfAHtyWRwBdJ7fHJw5I--ibl4cF3HHvTrJW_XrAxtElOprNj9xFmq4f4CF_IRcXdbP3Upg2-P7qo")'}}>
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">POR VISITAR</span>
+                                </div>
+                                <div className="absolute top-3 right-3">
+                                    <button className="bg-white/90 dark:bg-slate-900/90 backdrop-blur p-1.5 rounded-full text-rose-500 shadow-sm">
+                                        <span className="material-symbols-outlined text-[20px] fill-1">favorite</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="p-4 flex flex-col gap-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Sunset Bistro</p>
+                                        <div className="flex items-center gap-1 mt-1 text-slate-500 dark:text-slate-400">
+                                            <span className="material-symbols-outlined text-sm">location_on</span>
+                                            <p className="text-xs font-normal">456 Ocean Drive, Coastal</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">
+                                        <span className="material-symbols-outlined text-xs">star</span>
+                                        <span>4.5</span>
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex items-center justify-between">
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium italic">Guardado en "Ruta Gastronómica"</p>
+                                    <button className="flex items-center justify-center rounded-lg bg-primary/10 text-primary h-9 px-6 text-sm font-bold hover:bg-primary/20 transition-all">Reservar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <BottomNav currentPath="/saved" />
+                </MainContainer>
+            );
+        };
+
+        // --- Screen 3: Itinerary ---
+        const Itinerary = () => {
+            const [selectedDay, setSelectedDay] = useState(1);
+            
+            return (
+                <MainContainer>
+                    <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+                        <TopHeader title={`Día ${selectedDay}: Exploración`} actionIcon="calendar_month" />
+                        <div className="flex overflow-x-auto px-4 pb-3 no-scrollbar gap-2">
+                            {[1, 2, 3, 4, 5].map(day => (
+                                <button key={day} onClick={() => setSelectedDay(day)} className={`flex-shrink-0 px-4 py-2 rounded-full font-semibold text-sm transition-colors ${selectedDay === day ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                                    Día {day}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <main className="flex-1 p-4 pb-24">
+                        <div className="relative pl-8 mb-8">
+                            <div className="absolute left-0 top-0 h-full flex flex-col items-center">
+                                <div className="w-4 h-4 rounded-full border-2 border-primary bg-white dark:bg-slate-900 z-10"></div>
+                                <div className="w-0.5 grow bg-slate-200 dark:bg-slate-800 my-1"></div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs font-bold text-primary tracking-wider uppercase">08:30 AM</span>
+                                <h3 className="text-lg font-bold">Desayuno en Cafe de Flore</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-base">location_on</span> 172 Bd Saint-Germain, Paris
+                                </p>
+                                <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <img className="w-full h-32 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8_bE4yynzW4O93cyDpt72Jf_ZWCpExR3eK8wd0cXYu0XT08QDu-WjUbvIEkejFeOvANLLjfeS05ciUgy4HhI9vy970h_GNPh3ze0GqVEBHlBStvMaO42IwBpBMtsj-z15ZVc3e6HSkp0qs4dZLMBXLI23YSBJeEwk5ApHFjaVHZALV8sdixkbMcF-MiGO2Og6KwC9obdFirwyqEQX4RQsAPJLReKW9A82WbKM53KQVt7v_NzhH-fivSXsuPWf8mShInA5uEerwh4" alt="Cafe" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="relative pl-8 mb-8">
+                            <div className="absolute left-0 top-0 h-full flex flex-col items-center">
+                                <div className="w-0.5 grow bg-slate-200 dark:bg-slate-800"></div>
+                            </div>
+                            <div className="flex items-center gap-3 py-2 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <span className="material-symbols-outlined text-slate-400">directions_walk</span>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">15 min a pie</span>
+                                    <span className="text-[10px] text-slate-400">0.8 km de distancia</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="relative pl-8 mb-8">
+                            <div className="absolute left-0 top-0 h-full flex flex-col items-center">
+                                <div className="w-4 h-4 rounded-full border-2 border-primary bg-white dark:bg-slate-900 z-10"></div>
+                                <div className="w-0.5 grow bg-slate-200 dark:bg-slate-800 my-1"></div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs font-bold text-primary tracking-wider uppercase">10:30 AM</span>
+                                <h3 className="text-lg font-bold">Visita al Museo del Louvre</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-base">location_on</span> Rue de Rivoli, 75001 Paris
+                                </p>
+                                <div className="mt-3 relative h-40 w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                                    <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHPAXJVbCiBQNdHRm3WMN6dswznwLy0Ixx3hOvxckfQDMpy5W-F9I4mftdi6eNWGDFbhjgzJLxD34syVsTTdSPqwLf6XisnBJcoxjKPxBLfXSShixlly-_-Boo82_3n3AP6is6k_18g-yzlGCtGtwJT4byORMepEX6E8wIS87QNuQoCx3k8Mg1KEECfveyF3US59JzNDbiHwkkV4VNaxY_LIZzTDJyNbK75Jb1aI7MZHUVxnFwe9mwoB77zHePSp-MN-FyYxqy_pw" alt="Map" />
+                                    <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                        <div className="bg-white dark:bg-slate-900 p-2 rounded-full shadow-lg">
+                                            <span className="material-symbols-outlined text-primary text-3xl">location_on</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <BottomNav currentPath="/itinerary" />
+                </MainContainer>
+            );
+        };
+
+        // --- Screen 4: Expenses ---
+        const Expenses = () => {
+            return (
+                <MainContainer>
+                    <TopHeader title="Viaje: Bali 2024" actionIcon="group" actionIcon2="settings" />
+                    
+                    <main className="px-4 pt-6 space-y-6 pb-24 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-primary/10 dark:bg-primary/20 p-5 rounded-xl border border-primary/20">
+                                <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Total Spent</p>
+                                <p className="text-2xl font-extrabold text-slate-900 dark:text-white">$1,450.00</p>
+                                <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1"><span className="material-symbols-outlined text-xs">trending_up</span> +12% desde ayer</p>
+                            </div>
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-5 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">Your Balance</p>
+                                <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">+$52.50</p>
+                                <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-tighter">You are owed</p>
+                            </div>
+                        </div>
+
+                        <section>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-base font-bold">Ajustando Cuentas</h2>
+                                <button className="text-xs font-semibold text-primary">Ver Todo</button>
+                            </div>
+                            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                                <div className="p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                            <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCocfDN088IwFe1zQguG-iNqpSC3-NiBaRkVFOMn8E80U9ww-3wFq-nJLEOHItldMvQa0yel1o56122dAdN_wmAMTQ30rd-lNr-NEqbgZ0ntBcl2Nba8nlUlq2VcE9NW2rFOJo028mU-b1dNRS96H_9Cb857Ven_CpXbxwIQnrJYDuNvm5fgEJs9M9fJfar39ikyoZEY4uXt9g9HBOuasGs6qv3t8VywwqM42_Qt9dzwJlK79FvK631JgPyDoMTl3aoV74TLN3kzho" alt="John" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold">John te debe <span className="text-emerald-600">$32.50</span></p>
+                                            <p className="text-xs text-slate-500">Almuerzo club de playa</p>
+                                        </div>
+                                    </div>
+                                    <button className="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">Recordar</button>
+                                </div>
+                                <div className="h-px bg-slate-100 dark:bg-slate-800 mx-4"></div>
+                                <div className="p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                            <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAemB7ctqoOE5ty4aCv4YvmL16M4YHAhhu8gmfAev2NhcPk1Z0MzVQlfWlFsDVI3q6j1_QkibLDZQcS_QbCYghADxSwj6hNiVUGF-u9WqG6kT2p6c6y-FdmRrvA_iMA9A5GRD5xiGsUEBxIo4kwlQD5JRYcBwwzHVpvxhzxt8AXM9bd3kPakRsQMzLARYds9UMagHVP_zGp4okAUDvjVCSheE67K2xqFrmkk1ON9pDMqR_tWrmOf-l9yF-N9gKK3UTvJWjb-W5CtOc" alt="Sarah" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold">Sarah te debe <span className="text-emerald-600">$20.00</span></p>
+                                            <p className="text-xs text-slate-500">Depósito villa</p>
+                                        </div>
+                                    </div>
+                                    <button className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">Recordar</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-base font-bold">Gastos Recientes</h2>
+                                <button className="text-xs font-semibold text-primary">Filtrar</button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:shadow-sm transition-shadow">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-primary">restaurant</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold">Cena en La Favela</p>
+                                            <p className="text-xs text-slate-500">Pagado por <span className="font-semibold text-slate-700 dark:text-slate-300">ti</span></p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold">$120.00</p>
+                                        <p className="text-[10px] text-emerald-600 font-semibold">Prestaste $80.00</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:shadow-sm transition-shadow">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-amber-600">directions_car</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold">Traslado Aeropuerto</p>
+                                            <p className="text-xs text-slate-500">Pagado por <span className="font-semibold text-slate-700 dark:text-slate-300">Mike</span></p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold">$45.00</p>
+                                        <p className="text-[10px] text-slate-400 font-semibold">Tu parte $11.25</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                    
+                    <button className="fixed bottom-20 right-4 md:right-[calc(50%-13rem)] w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40">
+                        <span className="material-symbols-outlined text-3xl">add</span>
+                    </button>
+
+                    <BottomNav currentPath="/expenses" />
+                </MainContainer>
+            );
+        };
+
+        // --- App Component & Routing ---
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/saved" element={<SavedPlaces />} />
+                        <Route path="/itinerary" element={<Itinerary />} />
+                        <Route path="/expenses" element={<Expenses />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
