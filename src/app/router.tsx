@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 import { AppRouteGuard, TripAccessGuard } from "./components/route-guards";
 import { AppShell } from "./layouts/app-shell";
 import { useSession } from "./providers/session-provider";
+import { useUserSettings } from "../modules/settings/data/use-user-settings";
 import { RecoverScreen } from "../modules/auth/screens/recover-screen";
 import { LoginScreen } from "../modules/auth/screens/login-screen";
 import { RegisterScreen } from "../modules/auth/screens/register-screen";
@@ -25,12 +26,13 @@ import { SettlementsScreen } from "../modules/expenses/screens/settlements-scree
 
 function RootRedirect() {
   const { user, loading } = useSession();
+  const { settings, loading: settingsLoading } = useUserSettings();
 
-  if (loading) {
+  if (loading || (user && settingsLoading)) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">Cargando...</div>;
   }
 
-  return <Navigate to={user ? "/trips" : "/auth/login"} replace />;
+  return <Navigate to={user ? `/${settings?.startScreen ?? "trips"}` : "/auth/login"} replace />;
 }
 
 function ProtectedLayout() {

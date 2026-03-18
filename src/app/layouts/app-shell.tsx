@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import { cn } from "../../lib/utils";
+import { useUserSettings } from "../../modules/settings/data/use-user-settings";
 import { useTripOverview } from "../../modules/trips/data/use-trips-data";
 import { useSession } from "../providers/session-provider";
 
@@ -27,14 +28,21 @@ const tripLinks = [
 
 export function AppShell() {
   const { user, signOut } = useSession();
+  const { settings } = useUserSettings();
   const { tripId } = useParams();
   const location = useLocation();
   const { trip: activeTrip, members } = useTripOverview(tripId);
+  const compactMode = settings?.compactMode ?? false;
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
-        <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-white/90 p-6 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 xl:flex xl:flex-col">
+        <aside
+          className={cn(
+            "hidden w-72 shrink-0 border-r border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 xl:flex xl:flex-col",
+            compactMode ? "p-4" : "p-6"
+          )}
+        >
           <Link to="/trips" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white">
               <span className="material-symbols-outlined">travel_explore</span>
@@ -45,7 +53,7 @@ export function AppShell() {
             </div>
           </Link>
 
-          <div className="mt-8 rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
+          <div className={cn("mt-8 rounded-2xl bg-slate-50 dark:bg-slate-900", compactMode ? "p-3" : "p-4")}>
             <div className="flex items-center gap-3">
               {user?.avatarUrl ? <img src={user.avatarUrl} alt={user.displayName} className="h-12 w-12 rounded-full object-cover" /> : null}
               <div>
@@ -85,7 +93,7 @@ export function AppShell() {
 
         <div className="flex min-h-screen flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
-            <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-8">
+            <div className={cn("flex items-center justify-between gap-4 px-4 md:px-8", compactMode ? "py-3" : "py-4")}>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">Viajemos MVP</p>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -113,7 +121,7 @@ export function AppShell() {
               </div>
             </div>
             {activeTrip ? (
-              <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4 md:px-8">
+              <div className={cn("no-scrollbar flex gap-2 overflow-x-auto px-4 md:px-8", compactMode ? "pb-3" : "pb-4")}>
                 {tripLinks.map((link) => {
                   const to = `/trips/${activeTrip.id}/${link.slug}`;
                   const active = location.pathname === to;
@@ -137,7 +145,7 @@ export function AppShell() {
             ) : null}
           </header>
 
-          <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
+          <main className={cn("flex-1 px-4 md:px-8", compactMode ? "py-5 md:py-6" : "py-6 md:py-8")}>
             <Outlet />
           </main>
 

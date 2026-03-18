@@ -8,12 +8,14 @@ import { Card } from "../../../components/ui/card";
 import { hasGoogleMapsEnv } from "../../../lib/env";
 import { mapsRouteService } from "../../../services/maps-route-service";
 import { useItinerary } from "../../itinerary/data/use-itinerary-data";
+import { useUserSettings } from "../../settings/data/use-user-settings";
 import type { RouteSnapshot, RouteTravelMode } from "../../itinerary/domain/types";
 import { useTripOverview } from "../../trips/data/use-trips-data";
 import { useRouteSnapshot } from "../data/use-route-snapshot";
 
 export function MapScreen() {
   const { tripId } = useParams();
+  const { settings } = useUserSettings();
   const { trip, loading: tripLoading, error: tripError } = useTripOverview(tripId);
   const { days, itemsByDay, loading: itineraryLoading, error: itineraryError } = useItinerary(
     tripId,
@@ -50,6 +52,12 @@ export function MapScreen() {
       `${activeDay?.id ?? "day"}:${travelMode}:${activeDayItems.map((item) => `${item.id}:${item.order}:${item.address}`).join("|")}`,
     [activeDay?.id, activeDayItems, travelMode]
   );
+
+  useEffect(() => {
+    if (settings?.defaultMapMode) {
+      setTravelMode(settings.defaultMapMode);
+    }
+  }, [settings?.defaultMapMode]);
 
   useEffect(() => {
     if (!days.length) {

@@ -5,6 +5,7 @@ import type { TripDocument } from "../modules/documents/domain/types";
 import type { TripMessage } from "../modules/messages/domain/types";
 import type { AppNotification } from "../modules/notifications/domain/types";
 import type { Place, Reservation } from "../modules/places/domain/types";
+import type { UserSettings } from "../modules/settings/domain/types";
 import type { Trip, TripInvitation, TripMember } from "../modules/trips/domain/types";
 
 export const mockUser: AuthUser = {
@@ -398,3 +399,17 @@ export const notifications: AppNotification[] = [
     updatedAt: "2026-10-15T10:00:00.000Z"
   }
 ];
+
+export const userSettings: Record<string, UserSettings> = {
+  [mockUser.id]: {
+    userId: mockUser.id,
+    startScreen: "trips",
+    preferredTripId: "trip-tokyo",
+    defaultMapMode: "driving",
+    compactMode: false,
+    emailNotifications: true,
+    expenseNotifications: true,
+    itineraryNotifications: true,
+    messageNotifications: true
+  }
+};
