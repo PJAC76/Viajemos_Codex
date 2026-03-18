@@ -180,9 +180,9 @@ export const reservations: Reservation[] = [
 ];
 
 export const itineraryDays: ItineraryDay[] = [
-  { id: "day-1", tripId: "trip-tokyo", date: "2026-10-15", label: "Dia 1" },
-  { id: "day-2", tripId: "trip-tokyo", date: "2026-10-16", label: "Dia 2" },
-  { id: "day-3", tripId: "trip-tokyo", date: "2026-10-17", label: "Dia 3" }
+  { id: "day-1", tripId: "trip-tokyo", date: "2026-10-15", label: "Dia 1", position: 1 },
+  { id: "day-2", tripId: "trip-tokyo", date: "2026-10-16", label: "Dia 2", position: 2 },
+  { id: "day-3", tripId: "trip-tokyo", date: "2026-10-17", label: "Dia 3", position: 3 }
 ];
 
 export const itineraryItems: ItineraryItem[] = [
@@ -196,6 +196,8 @@ export const itineraryItems: ItineraryItem[] = [
     address: "Shibuya Sky Hotel",
     notes: "Check-in y dejar maletas.",
     placeId: "place-hotel",
+    order: 1,
+    createdBy: mockUser.id,
     transitLabel: "15 min en tren hacia la siguiente parada",
     icon: "hotel"
   },
@@ -209,6 +211,8 @@ export const itineraryItems: ItineraryItem[] = [
     address: "Asakusa, Taito City",
     notes: "Foto grupal y paseo por Nakamise.",
     placeId: "place-sensoji",
+    order: 2,
+    createdBy: "user-elena",
     transitLabel: "20 min a pie hacia la comida",
     icon: "temple_buddhist"
   },
@@ -221,6 +225,8 @@ export const itineraryItems: ItineraryItem[] = [
     startTime: "19:30",
     address: "Ginza, Tokyo",
     notes: "Reserva premium del grupo.",
+    order: 3,
+    createdBy: "user-javier",
     transitLabel: "Fin del dia",
     icon: "restaurant"
   }

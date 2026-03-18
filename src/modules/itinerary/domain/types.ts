@@ -5,6 +5,7 @@ export interface ItineraryDay {
   tripId: string;
   date: string;
   label: string;
+  position: number;
 }
 
 export interface ItineraryItem {
@@ -18,7 +19,21 @@ export interface ItineraryItem {
   address: string;
   notes: string;
   placeId?: string;
+  order: number;
+  createdBy: string;
   transitLabel?: string;
+  icon?: string;
+}
+
+export interface ItineraryItemUpsertInput {
+  dayId: string;
+  type: ItineraryItemType;
+  title: string;
+  startTime: string;
+  endTime?: string;
+  address: string;
+  notes: string;
+  placeId?: string;
   icon?: string;
 }
 
