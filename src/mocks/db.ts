@@ -248,9 +248,12 @@ export const routeSnapshots: RouteSnapshot[] = [
 ];
 
 export const expenseCategories: ExpenseCategory[] = [
-  { id: "cat-food", label: "Comida", icon: "restaurant" },
-  { id: "cat-stay", label: "Alojamiento", icon: "hotel" },
-  { id: "cat-transport", label: "Transporte", icon: "train" }
+  { id: "cat-stay", label: "Alojamiento", icon: "hotel", position: 1 },
+  { id: "cat-food", label: "Comida", icon: "restaurant", position: 2 },
+  { id: "cat-transport", label: "Transporte", icon: "train", position: 3 },
+  { id: "cat-activity", label: "Actividades", icon: "local_activity", position: 4 },
+  { id: "cat-shopping", label: "Compras", icon: "shopping_bag", position: 5 },
+  { id: "cat-other", label: "Otros", icon: "receipt_long", position: 6 }
 ];
 
 export const expenses: Expense[] = [
@@ -264,7 +267,14 @@ export const expenses: Expense[] = [
     paidByName: "Alex Garcia",
     date: "2026-10-18T19:30:00.000Z",
     splitBetween: ["user-alex", "user-elena", "user-javier", "user-lucia"],
-    description: "Menu degustacion para 4 personas."
+    description: "Menu degustacion para 4 personas.",
+    createdBy: mockUser.id,
+    splits: [
+      { id: "split-1", tripId: "trip-tokyo", expenseId: "exp-1", userId: "user-alex", amount: 80, status: "pending" },
+      { id: "split-2", tripId: "trip-tokyo", expenseId: "exp-1", userId: "user-elena", amount: 80, status: "pending" },
+      { id: "split-3", tripId: "trip-tokyo", expenseId: "exp-1", userId: "user-javier", amount: 80, status: "pending" },
+      { id: "split-4", tripId: "trip-tokyo", expenseId: "exp-1", userId: "user-lucia", amount: 80, status: "pending" }
+    ]
   },
   {
     id: "exp-2",
@@ -276,7 +286,14 @@ export const expenses: Expense[] = [
     paidByName: "Elena Martinez",
     date: "2026-10-15T09:10:00.000Z",
     splitBetween: ["user-alex", "user-elena", "user-javier", "user-lucia"],
-    description: "Traslado Narita - hotel."
+    description: "Traslado Narita - hotel.",
+    createdBy: "user-elena",
+    splits: [
+      { id: "split-5", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-alex", amount: 21, status: "pending" },
+      { id: "split-6", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-elena", amount: 21, status: "pending" },
+      { id: "split-7", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-javier", amount: 21, status: "pending" },
+      { id: "split-8", tripId: "trip-tokyo", expenseId: "exp-2", userId: "user-lucia", amount: 21, status: "pending" }
+    ]
   }
 ];
 

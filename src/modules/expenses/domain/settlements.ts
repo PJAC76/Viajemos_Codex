@@ -4,8 +4,20 @@ export function buildSettlements(expenses: Expense[], userNames: Record<string, 
   const balances = new Map<string, number>();
 
   for (const expense of expenses) {
-    const splitAmount = expense.amount / expense.splitBetween.length;
     balances.set(expense.paidBy, (balances.get(expense.paidBy) ?? 0) + expense.amount);
+
+    if (expense.splits && expense.splits.length > 0) {
+      for (const split of expense.splits) {
+        balances.set(split.userId, (balances.get(split.userId) ?? 0) - split.amount);
+      }
+      continue;
+    }
+
+    if (expense.splitBetween.length === 0) {
+      continue;
+    }
+
+    const splitAmount = expense.amount / expense.splitBetween.length;
 
     for (const participantId of expense.splitBetween) {
       balances.set(participantId, (balances.get(participantId) ?? 0) - splitAmount);

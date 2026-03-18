@@ -16,6 +16,10 @@ export const storageService = {
         tripId,
         fileName,
         path: data?.key ?? path,
+        bucketName: data?.bucket ?? "attachments-private",
+        mimeType: data?.mimeType ?? undefined,
+        size: data?.size ?? undefined,
+        uploadedAt: data?.uploadedAt ?? undefined,
         publicUrl: data?.url ?? ""
       };
     }
@@ -24,7 +28,25 @@ export const storageService = {
       tripId,
       fileName,
       path,
+      bucketName: "attachments-private",
+      mimeType: undefined,
+      size: undefined,
+      uploadedAt: undefined,
       publicUrl: ""
     };
+  },
+
+  async deleteTripFile(path?: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge || !path) {
+      return;
+    }
+
+    const { error } = await insforge.storage.from("attachments-private").remove(path);
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo borrar el archivo de InsForge Storage.");
+    }
   }
 };

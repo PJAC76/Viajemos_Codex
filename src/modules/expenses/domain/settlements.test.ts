@@ -28,4 +28,33 @@ describe("buildSettlements", () => {
     expect(settlements[0].toName).toBe("Alex");
     expect(settlements[0].amount).toBe(40);
   });
+
+  it("uses stored split amounts when they are available", () => {
+    const expenses: Expense[] = [
+      {
+        id: "2",
+        tripId: "trip",
+        concept: "Villa",
+        categoryId: "stay",
+        amount: 150,
+        paidBy: "alex",
+        paidByName: "Alex",
+        date: "2026-10-11T20:00:00.000Z",
+        splitBetween: ["alex", "elena"],
+        splits: [
+          { id: "s1", tripId: "trip", expenseId: "2", userId: "alex", amount: 100, status: "pending" },
+          { id: "s2", tripId: "trip", expenseId: "2", userId: "elena", amount: 50, status: "pending" }
+        ]
+      }
+    ];
+
+    const settlements = buildSettlements(expenses, {
+      alex: "Alex",
+      elena: "Elena"
+    });
+
+    expect(settlements).toHaveLength(1);
+    expect(settlements[0].fromName).toBe("Elena");
+    expect(settlements[0].amount).toBe(50);
+  });
 });
