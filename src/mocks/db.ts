@@ -3,6 +3,7 @@ import type { Expense, ExpenseCategory, Settlement } from "../modules/expenses/d
 import type { ItineraryDay, ItineraryItem, RouteSnapshot } from "../modules/itinerary/domain/types";
 import type { TripDocument } from "../modules/documents/domain/types";
 import type { TripMessage } from "../modules/messages/domain/types";
+import type { AppNotification } from "../modules/notifications/domain/types";
 import type { Place, Reservation } from "../modules/places/domain/types";
 import type { Trip, TripInvitation, TripMember } from "../modules/trips/domain/types";
 
@@ -371,19 +372,29 @@ export const messages: TripMessage[] = [
   }
 ];
 
-export const notifications = [
+export const notifications: AppNotification[] = [
   {
     id: "notification-1",
     userId: mockUser.id,
+    tripId: "trip-tokyo",
+    kind: "invitation",
     title: "Invitacion pendiente",
     body: "Carlos aun no ha aceptado la invitacion del viaje.",
-    createdAt: "2026-10-14T08:10:00.000Z"
+    isRead: false,
+    createdAt: "2026-10-14T08:10:00.000Z",
+    updatedAt: "2026-10-14T08:10:00.000Z"
   },
   {
     id: "notification-2",
     userId: mockUser.id,
+    tripId: "trip-tokyo",
+    actorId: "user-elena",
+    kind: "expense",
     title: "Nuevo gasto registrado",
     body: "Elena ha anadido Taxi aeropuerto por 84,00 EUR.",
-    createdAt: "2026-10-15T09:30:00.000Z"
+    isRead: true,
+    readAt: "2026-10-15T10:00:00.000Z",
+    createdAt: "2026-10-15T09:30:00.000Z",
+    updatedAt: "2026-10-15T10:00:00.000Z"
   }
 ];
