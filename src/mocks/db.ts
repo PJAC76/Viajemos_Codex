@@ -2,6 +2,7 @@ import type { AuthUser } from "../modules/auth/domain/types";
 import type { Expense, ExpenseCategory, Settlement } from "../modules/expenses/domain/types";
 import type { ItineraryDay, ItineraryItem, RouteSnapshot } from "../modules/itinerary/domain/types";
 import type { TripDocument } from "../modules/documents/domain/types";
+import type { TripMessage } from "../modules/messages/domain/types";
 import type { Place, Reservation } from "../modules/places/domain/types";
 import type { Trip, TripInvitation, TripMember } from "../modules/trips/domain/types";
 
@@ -349,14 +350,15 @@ export const documents: TripDocument[] = [
   }
 ];
 
-export const messages = [
+export const messages: TripMessage[] = [
   {
     id: "msg-1",
     tripId: "trip-tokyo",
     authorId: "user-elena",
     authorName: "Elena Martinez",
     body: "He reservado el restaurante del sabado por la noche.",
-    createdAt: "2026-10-14T18:30:00.000Z"
+    createdAt: "2026-10-14T18:30:00.000Z",
+    updatedAt: "2026-10-14T18:30:00.000Z"
   },
   {
     id: "msg-2",
@@ -364,7 +366,8 @@ export const messages = [
     authorId: mockUser.id,
     authorName: "Alex Garcia",
     body: "Perfecto. Yo cierro el hotel y comparto el localizador.",
-    createdAt: "2026-10-14T18:35:00.000Z"
+    createdAt: "2026-10-14T18:35:00.000Z",
+    updatedAt: "2026-10-14T18:35:00.000Z"
   }
 ];
 
