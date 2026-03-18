@@ -250,6 +250,14 @@ export function SettingsScreen() {
           </Card>
         </div>
       </div>
+
+      <div className="flex justify-end">
+        <p className="max-w-3xl text-right text-xs leading-6 text-slate-500 dark:text-slate-400">
+          Esta aplicacion ha sido disenada por Pedro Araujo para el uso y disfrute de las familias Araujo Martinez y
+          Llavador Ros, cualquier otro uso fuera de estas familias o para nuestros viajes sera considerado un delito de
+          propiedad intelectual.
+        </p>
+      </div>
     </div>
   );
 }
