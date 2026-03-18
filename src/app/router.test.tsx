@@ -16,4 +16,18 @@ describe("AppShell", () => {
 
     expect(screen.getAllByText("Viajemos")[0]).toBeInTheDocument();
   });
+
+  it("shows the main navigation destinations", () => {
+    render(
+      <SessionProvider>
+        <MemoryRouter initialEntries={["/trips"]}>
+          <AppShell />
+        </MemoryRouter>
+      </SessionProvider>
+    );
+
+    expect(screen.getAllByText("Mis viajes")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Explorar")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Perfil")[0]).toBeInTheDocument();
+  });
 });

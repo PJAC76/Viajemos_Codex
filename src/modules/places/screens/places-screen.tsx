@@ -104,7 +104,7 @@ export function PlacesScreen() {
   }
 
   function canEditPlace(place: Place) {
-    return Boolean(user && (isAdmin || place.createdBy === user.id));
+    return Boolean(user && isAdmin);
   }
 
   if (loading) {

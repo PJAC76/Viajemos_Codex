@@ -523,34 +523,23 @@ export const tripsQueries = {
       return trips[0];
     }
 
-    const tripId = crypto.randomUUID();
-
-    const { error: tripError } = await insforge.database.from("trips").insert({
-      id: tripId,
-      title: input.title.trim(),
-      destination: input.destination.trim(),
-      description: input.description.trim(),
-      cover_image: input.coverImage?.trim() || null,
-      start_date: input.startDate,
-      end_date: input.endDate,
-      currency: "EUR",
-      status: "active",
-      created_by: user.id
+    const { data, error } = await insforge.database.rpc("create_trip_with_admin", {
+      trip_title: input.title.trim(),
+      trip_destination: input.destination.trim(),
+      trip_description: input.description.trim(),
+      trip_cover_image: input.coverImage?.trim() || null,
+      trip_start_date: input.startDate,
+      trip_end_date: input.endDate
     });
 
-    if (tripError) {
-      throw new Error(tripError.message ?? "No se pudo crear el viaje.");
+    if (error) {
+      throw new Error(error.message ?? "No se pudo crear el viaje.");
     }
 
-    const { error: memberError } = await insforge.database.from("trip_members").insert({
-      trip_id: tripId,
-      user_id: user.id,
-      role: "admin",
-      status: "active"
-    });
+    const tripId = normalizeScalarRpcValue<string>(data);
 
-    if (memberError) {
-      throw new Error(memberError.message ?? "El viaje se creo, pero no se pudo registrar tu acceso.");
+    if (!tripId) {
+      throw new Error("El viaje se creo, pero no pudimos recuperar su identificador.");
     }
 
     const trip = await this.getTrip(tripId);

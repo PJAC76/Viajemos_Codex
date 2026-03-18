@@ -37,7 +37,7 @@ function normalizePlace(
     website: typeof row.website_url === "string" ? row.website_url : undefined,
     notes: typeof row.notes === "string" ? row.notes : undefined,
     createdBy: typeof row.created_by === "string" ? row.created_by : "",
-    favorite: currentUserFavoriteCount > 0 || favoriteCount > 0,
+    favorite: currentUserId ? currentUserFavoriteCount > 0 : favoriteCount > 0,
     favoriteCount
   };
 }
