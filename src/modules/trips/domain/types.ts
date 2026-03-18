@@ -12,6 +12,8 @@ export interface Trip {
   currency: "EUR";
   status: TripStatus;
   createdBy: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TripMember {
@@ -19,10 +21,11 @@ export interface TripMember {
   tripId: string;
   userId: string;
   displayName: string;
-  email: string;
-  avatarUrl: string;
+  email?: string;
+  avatarUrl?: string;
   role: TripRole;
   status: "active" | "invited";
+  joinedAt?: string;
 }
 
 export interface TripInvitation {
@@ -31,5 +34,16 @@ export interface TripInvitation {
   email: string;
   status: "pending" | "accepted" | "expired" | "revoked";
   invitedBy: string;
-  shareUrl: string;
+  shareUrl?: string;
+  token?: string;
+  createdAt?: string;
+}
+
+export interface TripUpsertInput {
+  title: string;
+  destination: string;
+  description: string;
+  coverImage?: string;
+  startDate: string;
+  endDate: string;
 }

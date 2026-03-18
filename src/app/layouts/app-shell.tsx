@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom";
-import { tripMembers, trips } from "../../mocks/db";
 import { cn } from "../../lib/utils";
+import { useTripOverview } from "../../modules/trips/data/use-trips-data";
 import { useSession } from "../providers/session-provider";
 
 const primaryLinks = [
@@ -29,8 +29,7 @@ export function AppShell() {
   const { user, signOut } = useSession();
   const { tripId } = useParams();
   const location = useLocation();
-  const activeTrip = trips.find((trip) => trip.id === tripId);
-  const members = tripId ? tripMembers.filter((member) => member.tripId === tripId) : [];
+  const { trip: activeTrip, members } = useTripOverview(tripId);
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -95,12 +94,21 @@ export function AppShell() {
               </div>
               <div className="hidden items-center gap-2 md:flex">
                 {members.slice(0, 4).map((member) => (
-                  <img
+                  <div
                     key={member.id}
-                    src={member.avatarUrl}
-                    alt={member.displayName}
-                    className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-slate-900"
-                  />
+                    className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-primary/15 text-sm font-bold text-primary dark:border-slate-900"
+                    title={member.displayName}
+                  >
+                    {member.avatarUrl ? (
+                      <img
+                        src={member.avatarUrl}
+                        alt={member.displayName}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span>{member.displayName.slice(0, 1).toUpperCase()}</span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

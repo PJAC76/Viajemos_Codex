@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { authClient } from "../../modules/auth/data/auth-client";
 import type { AuthUser } from "../../modules/auth/domain/types";
+import { profileClient } from "../../modules/profile/data/profile-client";
+import type { ProfileUpdateInput } from "../../modules/profile/domain/types";
 
 interface SessionContextValue {
   user: AuthUser | null;
@@ -11,6 +13,8 @@ interface SessionContextValue {
   signInWithGoogle: () => Promise<void>;
   sendResetPasswordEmail: (email: string) => Promise<void>;
   signInDemo: () => Promise<void>;
+  updateProfile: (input: ProfileUpdateInput) => Promise<void>;
+  refreshCurrentUser: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -21,10 +25,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
 
+  async function loadCurrentUser() {
+    const currentUser = await authClient.getCurrentUser();
+
+    if (!currentUser) {
+      setUser(null);
+      return;
+    }
+
+    const hydratedUser = await profileClient.ensureCurrentProfile(currentUser);
+    setUser(hydratedUser);
+  }
+
   useEffect(() => {
-    authClient
-      .getCurrentUser()
-      .then(setUser)
+    loadCurrentUser()
+      .catch((error) => {
+        console.error(error);
+        setAuthMessage(error instanceof Error ? error.message : "No se pudo restaurar la sesion.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -34,7 +52,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       loading,
       authMessage,
       async signInWithPassword(credentials) {
-        const signedUser = await authClient.signInWithPassword(credentials);
+        const signedUser = await profileClient.ensureCurrentProfile(await authClient.signInWithPassword(credentials));
         setUser(signedUser);
         setAuthMessage(null);
       },
@@ -42,7 +60,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         const result = await authClient.signUp(payload);
 
         if (result.user && !result.requiresEmailVerification) {
-          setUser(result.user);
+          const signedUser = await profileClient.ensureCurrentProfile(result.user);
+          setUser(signedUser);
         }
 
         setAuthMessage(
@@ -55,16 +74,39 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       },
       async signInWithGoogle() {
         const signedUser = await authClient.signInWithGoogle();
-        setUser(signedUser);
+
+        if (signedUser) {
+          setUser(signedUser);
+        }
       },
       async sendResetPasswordEmail(email) {
         await authClient.sendResetPasswordEmail(email);
         setAuthMessage("Te hemos enviado las instrucciones de recuperacion.");
       },
       async signInDemo() {
-        const signedUser = await authClient.signInDemo();
+        const signedUser = await profileClient.ensureCurrentProfile(await authClient.signInDemo());
         setUser(signedUser);
         setAuthMessage("Sesion demo iniciada.");
+      },
+      async updateProfile(input) {
+        if (!user) {
+          throw new Error("Necesitas iniciar sesion para editar el perfil.");
+        }
+
+        const nextUser = await profileClient.updateCurrentProfile(user, input);
+        setUser(nextUser);
+        setAuthMessage("Perfil actualizado correctamente.");
+      },
+      async refreshCurrentUser() {
+        const currentUser = await authClient.getCurrentUser();
+
+        if (!currentUser) {
+          setUser(null);
+          return;
+        }
+
+        const hydratedUser = await profileClient.ensureCurrentProfile(currentUser);
+        setUser(hydratedUser);
       },
       async signOut() {
         await authClient.signOut();

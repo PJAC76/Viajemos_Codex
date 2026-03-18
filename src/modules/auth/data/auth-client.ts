@@ -9,7 +9,7 @@ function normalizeAuthUser(user: {
   profile?: Record<string, unknown> | null;
 }): AuthUser {
   const profile = user.profile ?? {};
-  const provider = user.providers?.includes("google") ? "google" : "email";
+  const provider = user.providers?.includes("google") ? "google" : user.providers?.includes("github") ? "github" : "email";
 
   return {
     id: user.id,
@@ -54,7 +54,7 @@ export const authClient = {
     return normalizeAuthUser(data.user);
   },
 
-  async signInWithGoogle(): Promise<AuthUser> {
+  async signInWithGoogle(): Promise<AuthUser | null> {
     const insforge = getInsforgeClient();
 
     if (!insforge) {
@@ -73,11 +73,7 @@ export const authClient = {
       throw new Error(error.message ?? "No se pudo iniciar el flujo OAuth con Google.");
     }
 
-    return {
-      ...mockUser,
-      provider: "google",
-      email: data?.provider ? mockUser.email : mockUser.email
-    };
+    return data?.provider ? null : null;
   },
 
   async signUp({
