@@ -69,6 +69,8 @@ VITE_INSFORGE_ANON_KEY=
 VITE_GOOGLE_MAPS_API_KEY=
 ```
 
+Para preparacion de release usa tambien [`.env.production.example`](/C:/GPT_CODEX/Viajemos/.env.production.example).
+
 ## InsForge
 
 La conectividad con `InsForge` queda documentada en [docs/INSFORGE_SETUP.md](/C:/GPT_CODEX/Viajemos/docs/INSFORGE_SETUP.md).
@@ -107,3 +109,8 @@ Notas:
 - `npm run build` OK
 - `npm test` OK
 - `GitHub Actions` preparado para `build + test`
+
+## Cierre y release
+
+- checklist final de salida en [RELEASE_CHECKLIST.md](/C:/GPT_CODEX/Viajemos/docs/RELEASE_CHECKLIST.md)
+- conexion y mantenimiento de InsForge en [INSFORGE_SETUP.md](/C:/GPT_CODEX/Viajemos/docs/INSFORGE_SETUP.md)
