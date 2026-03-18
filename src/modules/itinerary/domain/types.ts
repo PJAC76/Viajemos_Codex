@@ -1,4 +1,5 @@
 export type ItineraryItemType = "linked_place" | "manual";
+export type RouteTravelMode = "driving" | "walking" | "transit";
 
 export interface ItineraryDay {
   id: string;
@@ -37,16 +38,24 @@ export interface ItineraryItemUpsertInput {
   icon?: string;
 }
 
-export interface RouteSnapshot {
-  id: string;
+export interface RouteSegment {
+  from: string;
+  to: string;
+  distanceKm: number;
+  durationMinutes: number;
+}
+
+export interface RouteSnapshotDraft {
   tripId: string;
   dayId: string;
   totalDistanceKm: number;
   totalDurationMinutes: number;
-  segments: Array<{
-    from: string;
-    to: string;
-    distanceKm: number;
-    durationMinutes: number;
-  }>;
+  travelMode: RouteTravelMode;
+  segments: RouteSegment[];
+}
+
+export interface RouteSnapshot extends RouteSnapshotDraft {
+  id: string;
+  createdBy?: string;
+  updatedAt?: string;
 }

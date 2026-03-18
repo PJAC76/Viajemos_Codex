@@ -239,6 +239,7 @@ export const routeSnapshots: RouteSnapshot[] = [
     dayId: "day-1",
     totalDistanceKm: 18.2,
     totalDurationMinutes: 72,
+    travelMode: "driving",
     segments: [
       { from: "Shibuya Sky Hotel", to: "Templo Senso-ji", distanceKm: 9.4, durationMinutes: 32 },
       { from: "Templo Senso-ji", to: "Sukiyabashi Jiro", distanceKm: 8.8, durationMinutes: 40 }
