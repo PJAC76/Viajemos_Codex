@@ -1,6 +1,7 @@
 import type { AuthUser } from "../modules/auth/domain/types";
 import type { Expense, ExpenseCategory, Settlement } from "../modules/expenses/domain/types";
 import type { ItineraryDay, ItineraryItem, RouteSnapshot } from "../modules/itinerary/domain/types";
+import type { TripDocument } from "../modules/documents/domain/types";
 import type { Place, Reservation } from "../modules/places/domain/types";
 import type { Trip, TripInvitation, TripMember } from "../modules/trips/domain/types";
 
@@ -315,12 +316,19 @@ export const settlements: Settlement[] = [
   }
 ];
 
-export const documents = [
+export const documents: TripDocument[] = [
   {
     id: "doc-1",
     tripId: "trip-tokyo",
     title: "Seguro de viaje",
     type: "pdf",
+    fileName: "seguro-viaje.pdf",
+    storageKey: "trips/trip-tokyo/documents/seguro-viaje.pdf",
+    bucketName: "attachments-private",
+    mimeType: "application/pdf",
+    fileSize: 128400,
+    createdBy: "user-alex",
+    createdByName: "Alex Garcia",
     updatedAt: "2026-09-20T09:00:00.000Z"
   },
   {
@@ -328,6 +336,15 @@ export const documents = [
     tripId: "trip-tokyo",
     title: "Tarjetas de embarque",
     type: "image",
+    fileName: "embarque-tokyo.png",
+    storageKey: "trips/trip-tokyo/documents/embarque-tokyo.png",
+    bucketName: "attachments-private",
+    mimeType: "image/png",
+    fileSize: 86500,
+    reservationId: "reservation-hotel",
+    reservationLabel: "Shibuya Sky Hotel",
+    createdBy: "user-elena",
+    createdByName: "Elena Martinez",
     updatedAt: "2026-10-14T19:30:00.000Z"
   }
 ];

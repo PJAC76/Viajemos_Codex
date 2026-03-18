@@ -48,5 +48,21 @@ export const storageService = {
     if (error) {
       throw new Error(error.message ?? "No se pudo borrar el archivo de InsForge Storage.");
     }
+  },
+
+  async downloadTripFile(path?: string) {
+    const insforge = getInsforgeClient();
+
+    if (!insforge || !path) {
+      return null;
+    }
+
+    const { data, error } = await insforge.storage.from("attachments-private").download(path);
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo descargar el archivo de InsForge Storage.");
+    }
+
+    return data ?? null;
   }
 };
