@@ -14,7 +14,7 @@ describe("AppShell", () => {
       </SessionProvider>
     );
 
-    expect(screen.getAllByText("Viajemos")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Tribu Trip")[0]).toBeInTheDocument();
   });
 
   it("shows the main navigation destinations", () => {

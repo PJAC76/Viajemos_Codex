@@ -6,7 +6,8 @@ export function AuthLayout({ children }: PropsWithChildren) {
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-[32px] border border-white/60 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950 md:grid-cols-[1.2fr_0.8fr]">
         <div className="hidden bg-slate-950 p-10 text-white md:flex md:flex-col md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">Viajemos</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">Tribu Trip</p>
+            <p className="mt-2 text-sm text-white/60">By Pedro Araujo</p>
             <h1 className="mt-6 max-w-md text-5xl font-extrabold leading-tight">Unifica tu viaje, incluso cuando el grupo no para.</h1>
             <p className="mt-4 max-w-md text-sm text-white/70">
               Base modular inspirada en Stitch para organizar lugares, reservas, gastos y ruta diaria.

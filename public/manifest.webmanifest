@@ -1,6 +1,6 @@
 {
-  "name": "Viajemos",
-  "short_name": "Viajemos",
+  "name": "Tribu Trip",
+  "short_name": "Tribu Trip",
   "description": "Organiza viajes privados, reservas, itinerario, documentos y gastos compartidos.",
   "start_url": "/",
   "display": "standalone",

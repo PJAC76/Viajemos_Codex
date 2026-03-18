@@ -48,8 +48,8 @@ export function AppShell() {
               <span className="material-symbols-outlined">travel_explore</span>
             </div>
             <div>
-              <p className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Viajemos</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">PWA de viajes privados</p>
+              <p className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Tribu Trip</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">By Pedro Araujo</p>
             </div>
           </Link>
 
