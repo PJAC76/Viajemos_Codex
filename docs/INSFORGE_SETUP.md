@@ -28,6 +28,22 @@ El script ejecuta internamente:
 npx @insforge/install --client codex --env API_KEY=<INSFORGE_API_KEY> --env API_BASE_URL=<INSFORGE_BASE_URL>
 ```
 
+## Enlace del proyecto del dashboard
+
+Para que el proyecto aparezca enlazado en el dashboard de InsForge, ademas del MCP hay que hacer `CLI link` en esta carpeta:
+
+```bash
+insforge link --project-id <INSFORGE_PROJECT_ID>
+```
+
+Ese comando crea [`.insforge/project.json`](/C:/GPT_CODEX/Viajemos/.insforge/project.json) de forma local con el `project_id`, `appkey` y `oss_host` del proyecto enlazado.
+
+Importante:
+
+- `CLI link` no debe subirse al repo porque `.insforge/` contiene una `api_key` del proyecto.
+- El estado `Agent Connected` del dashboard no se enciende solo por instalar MCP.
+- El dashboard lo marca cuando el agente ya enlazado ejecuta una herramienta MCP real contra ese proyecto.
+
 ## Verificacion
 
 1. Reinicia `Codex`.
@@ -39,6 +55,14 @@ I'm using InsForge as my backend platform, call InsForge MCP's fetch-docs tool t
 ```
 
 Si `Codex` puede leer `fetch-docs` o `get-backend-metadata`, la conexion esta activa.
+
+Si el dashboard sigue mostrando `Not Connected`, el orden correcto es:
+
+1. `insforge link --project-id <PROJECT_ID>`
+2. `npm run insforge:connect -- -ApiKey <API_KEY> -ApiBaseUrl <BASE_URL>`
+3. reiniciar `Codex`
+4. ejecutar una herramienta MCP real
+5. refrescar el dashboard
 
 ## Rotacion de API key
 

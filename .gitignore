@@ -7,3 +7,19 @@ vite.config.js
 vite.config.d.ts
 tailwind.config.js
 tailwind.config.d.ts
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+skills-lock.json

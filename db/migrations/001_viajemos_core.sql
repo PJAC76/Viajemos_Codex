@@ -8,8 +8,10 @@ begin
 end;
 $$;
 
+create schema if not exists public;
+
 create table if not exists public.profiles (
-  user_id uuid primary key references public.users(id) on delete cascade,
+  user_id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null,
   avatar_url text,
   login_provider text not null default 'email',
@@ -28,7 +30,7 @@ create table if not exists public.trips (
   end_date date not null,
   currency text not null default 'EUR',
   status text not null default 'draft',
-  created_by uuid not null references public.users(id) on delete restrict,
+  created_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint trips_currency_check check (currency = 'EUR'),
@@ -39,7 +41,7 @@ create table if not exists public.trips (
 create table if not exists public.trip_members (
   id uuid primary key default gen_random_uuid(),
   trip_id uuid not null references public.trips(id) on delete cascade,
-  user_id uuid not null references public.users(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
   role text not null,
   status text not null default 'active',
   joined_at timestamptz not null default now(),
@@ -56,7 +58,7 @@ create table if not exists public.trip_invitations (
   email text not null,
   token text not null unique,
   status text not null default 'pending',
-  invited_by uuid not null references public.users(id) on delete restrict,
+  invited_by uuid not null references auth.users(id) on delete restrict,
   share_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -277,8 +279,15 @@ execute function public.viajemos_set_updated_at();
 insert into public.profiles (user_id, display_name, avatar_url, login_provider)
 select
   u.id,
-  coalesce(nullif(u.nombre, ''), split_part(u.email, '@', 1)),
-  u.foto_url,
-  'email'
-from public.users u
+  coalesce(
+    nullif(u.profile ->> 'name', ''),
+    split_part(u.email, '@', 1)
+  ),
+  nullif(u.profile ->> 'avatar_url', ''),
+  case
+    when coalesce((u.metadata -> 'providers')::text, '') ilike '%google%' then 'google'
+    when coalesce((u.metadata -> 'providers')::text, '') ilike '%github%' then 'github'
+    else 'email'
+  end
+from auth.users u
 on conflict (user_id) do nothing;
