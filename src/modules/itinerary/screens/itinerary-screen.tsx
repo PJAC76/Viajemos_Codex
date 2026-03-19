@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
@@ -12,6 +12,7 @@ import { usePlacesCatalog } from "../../places/data/use-places-data";
 import type { Place } from "../../places/domain/types";
 import { useTripOverview, useTripPermission } from "../../trips/data/use-trips-data";
 import { useSession } from "../../../app/providers/session-provider";
+import { useRouteSnapshot } from "../../maps/data/use-route-snapshot";
 import { useItinerary } from "../data/use-itinerary-data";
 import type { ItineraryItem, ItineraryItemType, ItineraryItemUpsertInput } from "../domain/types";
 
@@ -93,6 +94,7 @@ export function ItineraryScreen() {
   const activeDay = days.find((day) => day.id === activeDayId) ?? days[0] ?? null;
   const activeItems = activeDay ? itemsByDay.get(activeDay.id) ?? [] : [];
   const linkedPlaces = useMemo(() => places.filter((place) => place.type !== "place" || place.address), [places]);
+  const { snapshot: routeSnapshot, loading: routeLoading } = useRouteSnapshot(tripId, activeDay?.id);
 
   function resetForm() {
     setShowForm(false);
@@ -249,6 +251,45 @@ export function ItineraryScreen() {
           </button>
         ))}
       </div>
+
+      <Card className="p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">map</span>
+              <p className="text-lg font-bold text-slate-900 dark:text-white">Mapa del dia</p>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {activeDay
+                ? `Abre la vista de mapa para ${activeDay.label} y calcula la ruta optimizada entre las paradas del dia.`
+                : "Selecciona un dia del itinerario para abrir su mapa."}
+            </p>
+          </div>
+          {tripId && activeDay ? (
+            <Link to={`/trips/${tripId}/map`}>
+              <Button>Ir a mapa y rutas</Button>
+            </Link>
+          ) : null}
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Paradas del dia</p>
+            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">{activeItems.length}</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Distancia estimada</p>
+            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+              {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDistanceKm.toFixed(1)} km` : "Pendiente"}
+            </p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tiempo estimado</p>
+            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+              {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDurationMinutes} min` : "Pendiente"}
+            </p>
+          </div>
+        </div>
+      </Card>
 
       {showForm && activeDay ? (
         <Card className="p-6">

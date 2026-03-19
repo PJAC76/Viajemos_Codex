@@ -4,6 +4,7 @@ import { AuthLayout } from "../../../app/layouts/auth-layout";
 import { useSession } from "../../../app/providers/session-provider";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
+import { TripCoverImage } from "../../../components/trips/trip-cover-image";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
@@ -93,9 +94,7 @@ export function AcceptInvitationScreen() {
     <AuthLayout>
       <Card className="w-full max-w-2xl overflow-hidden">
         <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-900">
-          {invitation.coverImage ? (
-            <img src={invitation.coverImage} alt={invitation.tripTitle} className="h-full w-full object-cover" />
-          ) : null}
+          <TripCoverImage src={invitation.coverImage} alt={invitation.tripTitle} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6 text-white">
             <div className="flex items-center gap-2">

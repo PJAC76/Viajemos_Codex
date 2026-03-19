@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
+import { TripCoverImage } from "../../../components/trips/trip-cover-image";
 import { StatCard } from "../../../components/trips/stat-card";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
@@ -133,7 +134,7 @@ export function ExploreScreen() {
               <Link key={trip.id} to={`/trips/${trip.id}/summary`}>
                 <Card className="h-full overflow-hidden border-white/60 bg-white/80 p-0 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
                   <div className="aspect-[16/10] bg-slate-200">
-                    <img src={trip.coverImage} alt={trip.title} className="h-full w-full object-cover" />
+                    <TripCoverImage src={trip.coverImage} alt={trip.title} className="h-full w-full object-cover" />
                   </div>
                   <div className="space-y-2 p-4">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{trip.title}</p>

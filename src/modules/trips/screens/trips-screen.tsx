@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ErrorState } from "../../../components/states/error-state";
 import { EmptyState } from "../../../components/states/empty-state";
+import { ErrorState } from "../../../components/states/error-state";
 import { MemberStack } from "../../../components/trips/member-stack";
 import { SectionHeader } from "../../../components/trips/section-header";
+import { TripCoverImage } from "../../../components/trips/trip-cover-image";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
@@ -92,8 +93,11 @@ export function TripsScreen() {
               <Input
                 value={coverImage}
                 onChange={(event) => setCoverImage(event.target.value)}
-                placeholder="URL opcional para la portada"
+                placeholder="URL directa de imagen para la portada"
               />
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Usa una URL directa de imagen. Si pegas la URL de una web, se mostrara una portada por defecto.
+              </p>
             </div>
             <div className="space-y-2 md:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Descripcion</p>
@@ -129,13 +133,13 @@ export function TripsScreen() {
       <div className="grid gap-6 lg:grid-cols-2">
         {trips.map((trip) => (
           <Card key={trip.id} className="overflow-hidden">
-            <img src={trip.coverImage} alt={trip.title} className="h-56 w-full object-cover" />
+            <TripCoverImage src={trip.coverImage} alt={trip.title} className="h-56 w-full object-cover" />
             <div className="p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">{trip.title}</h2>
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    {formatDateRange(trip.startDate, trip.endDate)} · {trip.destination}
+                    {formatDateRange(trip.startDate, trip.endDate)} - {trip.destination}
                   </p>
                 </div>
                 <MemberStack tripId={trip.id} />

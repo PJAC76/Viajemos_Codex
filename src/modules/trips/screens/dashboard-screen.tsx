@@ -4,6 +4,7 @@ import { itineraryItems } from "../../../mocks/db";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { MemberStack } from "../../../components/trips/member-stack";
+import { TripCoverImage } from "../../../components/trips/trip-cover-image";
 import { SectionHeader } from "../../../components/trips/section-header";
 import { StatCard } from "../../../components/trips/stat-card";
 import { TripHero } from "../../../components/trips/trip-hero";
@@ -126,6 +127,12 @@ export function DashboardScreen() {
             <div className="space-y-2 md:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Portada</p>
               <Input value={coverImage} onChange={(event) => setCoverImage(event.target.value)} />
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Usa una URL directa de imagen. Si pegas la URL de una web, se mostrara una portada por defecto.
+              </p>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
+                <TripCoverImage src={coverImage} alt={title || "Vista previa de portada"} className="h-44 w-full object-cover" />
+              </div>
             </div>
             <div className="space-y-2 md:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Descripcion</p>
