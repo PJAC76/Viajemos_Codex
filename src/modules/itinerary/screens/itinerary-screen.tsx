@@ -7,6 +7,7 @@ import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
+import { formatDateLabel } from "../../../lib/utils";
 import { usePlacesCatalog } from "../../places/data/use-places-data";
 import type { Place } from "../../places/domain/types";
 import { useTripOverview, useTripPermission } from "../../trips/data/use-trips-data";
@@ -27,7 +28,7 @@ const emptyItemForm: ItineraryItemUpsertInput = {
 };
 
 function formatDayShort(date: string) {
-  return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(new Date(date));
+  return formatDateLabel(date, { day: "numeric", month: "short" });
 }
 
 function buildItemForm(dayId: string, place?: Place): ItineraryItemUpsertInput {

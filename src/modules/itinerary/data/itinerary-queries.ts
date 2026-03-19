@@ -1,5 +1,6 @@
 import { itineraryDays, itineraryItems } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
+import { formatLocalDateIso, parseDateValue } from "../../../lib/utils";
 import { authClient } from "../../auth/data/auth-client";
 import type { ItineraryDay, ItineraryItem, ItineraryItemType, ItineraryItemUpsertInput } from "../domain/types";
 
@@ -10,14 +11,14 @@ function buildTripDayRange(startDate: string, endDate: string) {
     return days;
   }
 
-  const start = new Date(`${startDate}T00:00:00`);
-  const end = new Date(`${endDate}T00:00:00`);
+  const start = parseDateValue(startDate);
+  const end = parseDateValue(endDate);
   let cursor = new Date(start);
   let position = 1;
 
   while (cursor <= end) {
     days.push({
-      date: cursor.toISOString().slice(0, 10),
+      date: formatLocalDateIso(cursor),
       label: `Dia ${position}`,
       position
     });
