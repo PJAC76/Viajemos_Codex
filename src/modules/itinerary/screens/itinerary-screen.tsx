@@ -55,6 +55,16 @@ function canManageItem(item: ItineraryItem, currentUserId?: string, isAdmin?: bo
   return Boolean(isAdmin || (currentUserId && item.createdBy === currentUserId));
 }
 
+function normalizeItineraryActionError(errorMessage: string) {
+  const normalized = errorMessage.toLowerCase();
+
+  if (normalized.includes("jwt expired") || normalized.includes("sesion ha caducado") || normalized.includes("token expired")) {
+    return "Tu sesion ha caducado. Vuelve a iniciar sesion y repite la operacion.";
+  }
+
+  return errorMessage;
+}
+
 export function ItineraryScreen() {
   const { tripId } = useParams();
   const { user } = useSession();
@@ -160,7 +170,9 @@ export function ItineraryScreen() {
 
       resetForm();
     } catch (itemError) {
-      setActionError(itemError instanceof Error ? itemError.message : "No se pudo guardar el evento.");
+      setActionError(
+        normalizeItineraryActionError(itemError instanceof Error ? itemError.message : "No se pudo guardar el evento.")
+      );
     } finally {
       setSubmitting(false);
     }
@@ -171,7 +183,9 @@ export function ItineraryScreen() {
       setActionError(null);
       await deleteItem(itemId);
     } catch (itemError) {
-      setActionError(itemError instanceof Error ? itemError.message : "No se pudo borrar el evento.");
+      setActionError(
+        normalizeItineraryActionError(itemError instanceof Error ? itemError.message : "No se pudo borrar el evento.")
+      );
     }
   }
 
@@ -184,7 +198,11 @@ export function ItineraryScreen() {
       setActionError(null);
       await moveItem(activeDay.id, itemId, direction);
     } catch (moveError) {
-      setActionError(moveError instanceof Error ? moveError.message : "No se pudo reordenar el evento.");
+      setActionError(
+        normalizeItineraryActionError(
+          moveError instanceof Error ? moveError.message : "No se pudo reordenar el evento."
+        )
+      );
     }
   }
 
@@ -193,7 +211,7 @@ export function ItineraryScreen() {
   }
 
   if (error) {
-    return <ErrorState title="No hemos podido cargar el itinerario" description={error} />;
+    return <ErrorState title="No hemos podido cargar el itinerario" description={normalizeItineraryActionError(error)} />;
   }
 
   if (!trip) {

@@ -1,5 +1,6 @@
 import { itineraryDays, itineraryItems } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
+import { authClient } from "../../auth/data/auth-client";
 import type { ItineraryDay, ItineraryItem, ItineraryItemType, ItineraryItemUpsertInput } from "../domain/types";
 
 function buildTripDayRange(startDate: string, endDate: string) {
@@ -69,6 +70,31 @@ function inferItemIcon(type: ItineraryItemType, icon?: string, title?: string) {
   }
 
   return "place";
+}
+
+function isExpiredJwtMessage(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("jwt expired") || normalized.includes("expired jwt") || normalized.includes("token expired");
+}
+
+async function withSessionRefresh<T>(operation: () => Promise<T>) {
+  try {
+    return await operation();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (!isExpiredJwtMessage(message)) {
+      throw error;
+    }
+
+    const refreshedUser = await authClient.refreshSession().catch(() => null);
+
+    if (!refreshedUser) {
+      throw new Error("Tu sesion ha caducado. Vuelve a iniciar sesion para continuar.");
+    }
+
+    return operation();
+  }
 }
 
 function normalizeItineraryItem(row: Record<string, unknown>): ItineraryItem {
@@ -143,25 +169,31 @@ async function ensureTripDays(tripId: string, startDate?: string, endDate?: stri
     return;
   }
 
-  const { data, error } = await insforge.database
-    .from("itinerary_days")
-    .select("id, date, label, position")
-    .eq("trip_id", tripId);
+  const { data, error } = await withSessionRefresh(async () => {
+    const response = await insforge.database
+      .from("itinerary_days")
+      .select("id, date, label, position")
+      .eq("trip_id", tripId);
 
-  if (error) {
-    throw new Error(error.message ?? "No se pudieron comprobar los dias del itinerario.");
-  }
+    if (response.error) {
+      throw new Error(response.error.message ?? "No se pudieron comprobar los dias del itinerario.");
+    }
+
+    return response;
+  });
 
   const existingRows = (data as Array<Record<string, unknown>> | null) ?? [];
   const existingByDate = new Map(existingRows.map((row) => [String(row.date), row]));
   const extraDayIds = existingRows.filter((row) => !desiredDates.has(String(row.date))).map((row) => String(row.id));
 
   if (extraDayIds.length > 0) {
-    const deleteResult = await insforge.database.from("itinerary_days").delete().in("id", extraDayIds);
+    await withSessionRefresh(async () => {
+      const deleteResult = await insforge.database.from("itinerary_days").delete().in("id", extraDayIds);
 
-    if (deleteResult.error) {
-      throw new Error(deleteResult.error.message ?? "No se pudieron limpiar los dias antiguos del itinerario.");
-    }
+      if (deleteResult.error) {
+        throw new Error(deleteResult.error.message ?? "No se pudieron limpiar los dias antiguos del itinerario.");
+      }
+    });
   }
 
   const missingDays = desiredDays
@@ -190,27 +222,31 @@ async function ensureTripDays(tripId: string, startDate?: string, endDate?: stri
         continue;
       }
 
-      const updateResult = await insforge.database
-        .from("itinerary_days")
-        .update({
-          label: nextLabel,
-          position: nextPosition
-        })
-        .eq("id", String(existingDay.id));
+      await withSessionRefresh(async () => {
+        const updateResult = await insforge.database
+          .from("itinerary_days")
+          .update({
+            label: nextLabel,
+            position: nextPosition
+          })
+          .eq("id", String(existingDay.id));
 
-      if (updateResult.error) {
-        throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
-      }
+        if (updateResult.error) {
+          throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
+        }
+      });
     }
 
     return;
   }
 
-  const insertResult = await insforge.database.from("itinerary_days").insert(missingDays);
+  await withSessionRefresh(async () => {
+    const insertResult = await insforge.database.from("itinerary_days").insert(missingDays);
 
-  if (insertResult.error) {
-    throw new Error(insertResult.error.message ?? "No se pudieron crear los dias del itinerario.");
-  }
+    if (insertResult.error) {
+      throw new Error(insertResult.error.message ?? "No se pudieron crear los dias del itinerario.");
+    }
+  });
 
   for (const desiredDay of desiredDays) {
     const existingDay = existingByDate.get(desiredDay.date);
@@ -228,17 +264,19 @@ async function ensureTripDays(tripId: string, startDate?: string, endDate?: stri
       continue;
     }
 
-    const updateResult = await insforge.database
-      .from("itinerary_days")
-      .update({
-        label: nextLabel,
-        position: nextPosition
-      })
-      .eq("id", String(existingDay.id));
+    await withSessionRefresh(async () => {
+      const updateResult = await insforge.database
+        .from("itinerary_days")
+        .update({
+          label: nextLabel,
+          position: nextPosition
+        })
+        .eq("id", String(existingDay.id));
 
-    if (updateResult.error) {
-      throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
-    }
+      if (updateResult.error) {
+        throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
+      }
+    });
   }
 }
 
@@ -252,15 +290,19 @@ export const itineraryQueries = {
 
     await ensureTripDays(tripId, startDate, endDate);
 
-    const { data, error } = await insforge.database
-      .from("itinerary_days")
-      .select("*")
-      .eq("trip_id", tripId)
-      .order("position", { ascending: true });
+    const { data } = await withSessionRefresh(async () => {
+      const response = await insforge.database
+        .from("itinerary_days")
+        .select("*")
+        .eq("trip_id", tripId)
+        .order("position", { ascending: true });
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudieron cargar los dias del itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudieron cargar los dias del itinerario.");
+      }
+
+      return response;
+    });
 
     return ((data as Array<Record<string, unknown>> | null) ?? []).map(normalizeItineraryDay);
   },
@@ -274,15 +316,19 @@ export const itineraryQueries = {
         .sort((left, right) => left.order - right.order || left.startTime.localeCompare(right.startTime));
     }
 
-    const { data, error } = await insforge.database
-      .from("itinerary_items")
-      .select("*")
-      .eq("trip_id", tripId)
-      .order("order_index", { ascending: true });
+    const { data } = await withSessionRefresh(async () => {
+      const response = await insforge.database
+        .from("itinerary_items")
+        .select("*")
+        .eq("trip_id", tripId)
+        .order("order_index", { ascending: true });
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudieron cargar los eventos del itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudieron cargar los eventos del itinerario.");
+      }
+
+      return response;
+    });
 
     return ((data as Array<Record<string, unknown>> | null) ?? []).map(normalizeItineraryItem);
   },
@@ -311,30 +357,34 @@ export const itineraryQueries = {
       return item;
     }
 
-    const { data, error } = await insforge.database
-      .from("itinerary_items")
-      .insert([
-        {
-          trip_id: tripId,
-          day_id: input.dayId,
-          type: input.type,
-          title: input.title.trim(),
-          start_time: input.startTime,
-          end_time: input.endTime || null,
-          address: input.address.trim(),
-          notes: input.notes.trim(),
-          place_id: input.placeId || null,
-          order_index: nextOrder,
-          icon: input.icon || null,
-          created_by: userId
-        }
-      ])
-      .select()
-      .single();
+    const { data } = await withSessionRefresh(async () => {
+      const response = await insforge.database
+        .from("itinerary_items")
+        .insert([
+          {
+            trip_id: tripId,
+            day_id: input.dayId,
+            type: input.type,
+            title: input.title.trim(),
+            start_time: input.startTime,
+            end_time: input.endTime || null,
+            address: input.address.trim(),
+            notes: input.notes.trim(),
+            place_id: input.placeId || null,
+            order_index: nextOrder,
+            icon: input.icon || null,
+            created_by: userId
+          }
+        ])
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudo crear el evento del itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudo crear el evento del itinerario.");
+      }
+
+      return response;
+    });
 
     return normalizeItineraryItem(data as Record<string, unknown>);
   },
@@ -356,26 +406,30 @@ export const itineraryQueries = {
       return item;
     }
 
-    const { data, error } = await insforge.database
-      .from("itinerary_items")
-      .update({
-        day_id: input.dayId,
-        type: input.type,
-        title: input.title.trim(),
-        start_time: input.startTime,
-        end_time: input.endTime || null,
-        address: input.address.trim(),
-        notes: input.notes.trim(),
-        place_id: input.placeId || null,
-        icon: input.icon || null
-      })
-      .eq("id", itemId)
-      .select()
-      .single();
+    const { data } = await withSessionRefresh(async () => {
+      const response = await insforge.database
+        .from("itinerary_items")
+        .update({
+          day_id: input.dayId,
+          type: input.type,
+          title: input.title.trim(),
+          start_time: input.startTime,
+          end_time: input.endTime || null,
+          address: input.address.trim(),
+          notes: input.notes.trim(),
+          place_id: input.placeId || null,
+          icon: input.icon || null
+        })
+        .eq("id", itemId)
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudo actualizar el evento del itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudo actualizar el evento del itinerario.");
+      }
+
+      return response;
+    });
 
     return normalizeItineraryItem(data as Record<string, unknown>);
   },
@@ -393,11 +447,13 @@ export const itineraryQueries = {
       return;
     }
 
-    const { error } = await insforge.database.from("itinerary_items").delete().eq("id", itemId);
+    await withSessionRefresh(async () => {
+      const response = await insforge.database.from("itinerary_items").delete().eq("id", itemId);
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudo borrar el evento del itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudo borrar el evento del itinerario.");
+      }
+    });
   },
 
   async saveItemOrder(dayId: string, orderedItems: ItineraryItem[]) {
@@ -415,13 +471,15 @@ export const itineraryQueries = {
       return;
     }
 
-    const { error } = await insforge.database.rpc("reorder_itinerary_items", {
-      target_day_id: dayId,
-      ordered_item_ids: orderedItems.map((item) => item.id)
-    });
+    await withSessionRefresh(async () => {
+      const response = await insforge.database.rpc("reorder_itinerary_items", {
+        target_day_id: dayId,
+        ordered_item_ids: orderedItems.map((item) => item.id)
+      });
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudo reordenar el itinerario.");
-    }
+      if (response.error) {
+        throw new Error(response.error.message ?? "No se pudo reordenar el itinerario.");
+      }
+    });
   }
 };
