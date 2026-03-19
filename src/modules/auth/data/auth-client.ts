@@ -137,7 +137,7 @@ export const authClient = {
 
     return {
       user: data?.user ? normalizeAuthUser(data.user) : null,
-      requiresEmailVerification: Boolean(data?.requireEmailVerification)
+      requiresEmailVerification: Boolean(data?.requireEmailVerification || !data?.accessToken)
     };
   },
 

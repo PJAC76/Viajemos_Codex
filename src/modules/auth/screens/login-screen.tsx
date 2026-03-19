@@ -8,6 +8,18 @@ import { Input } from "../../../components/ui/input";
 import { hasInsforgeEnv } from "../../../lib/env";
 import { authClient } from "../data/auth-client";
 
+function isEmailVerificationError(message: string) {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("verify") ||
+    normalized.includes("verified") ||
+    normalized.includes("verifica") ||
+    normalized.includes("validado") ||
+    normalized.includes("email not verified")
+  );
+}
+
 export function LoginScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -17,6 +29,7 @@ export function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -31,10 +44,13 @@ export function LoginScreen() {
     try {
       setSubmitting(true);
       setError(null);
+      setNeedsVerification(false);
       await signInWithPassword({ email, password });
       navigate(inviteToken ? `/invite/${inviteToken}` : "/trips");
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "No se pudo iniciar sesion.");
+      const nextError = authError instanceof Error ? authError.message : "No se pudo iniciar sesion.";
+      setError(nextError);
+      setNeedsVerification(isEmailVerificationError(nextError));
     } finally {
       setSubmitting(false);
     }
@@ -58,6 +74,23 @@ export function LoginScreen() {
           />
           {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
           {authMessage ? <p className="text-sm font-medium text-emerald-600">{authMessage}</p> : null}
+          {needsVerification ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                const params = new URLSearchParams({ email });
+
+                if (inviteToken) {
+                  params.set("invite", inviteToken);
+                }
+
+                navigate(`/auth/verify?${params.toString()}`);
+              }}
+            >
+              Introducir codigo de verificacion
+            </Button>
+          ) : null}
           <Button fullWidth onClick={() => void handleLogin()} disabled={submitting || !email || !password}>
             {submitting ? "Entrando..." : "Entrar con email"}
           </Button>
@@ -83,6 +116,12 @@ export function LoginScreen() {
         <div className="mt-6 flex items-center justify-between text-sm">
           <Link to="/auth/recover" className="font-semibold text-primary">
             Recuperar acceso
+          </Link>
+          <Link
+            to={email ? `/auth/verify?email=${encodeURIComponent(email)}` : "/auth/verify"}
+            className="font-semibold text-primary"
+          >
+            Verificar email
           </Link>
           <Link
             to={inviteToken ? `/auth/register?invite=${encodeURIComponent(inviteToken)}` : "/auth/register"}

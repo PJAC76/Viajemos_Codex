@@ -8,7 +8,7 @@ export function AuthLayout({ children }: PropsWithChildren) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">Tribu Trip</p>
             <p className="mt-2 text-sm text-white/60">By Pedro Araujo</p>
-            <h1 className="mt-6 max-w-md text-5xl font-extrabold leading-tight">Unifica tu viaje, incluso cuando el grupo no para.</h1>
+            <h1 className="mt-6 max-w-md text-5xl font-extrabold leading-tight">Unifica y Comparte tu viaje, incluso cuando el grupo no para.</h1>
             <p className="mt-4 max-w-md text-sm text-white/70">
               Base modular inspirada en Stitch para organizar lugares, reservas, gastos y ruta diaria.
             </p>
