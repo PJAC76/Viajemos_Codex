@@ -39,6 +39,10 @@ export function MembersScreen() {
       return "Solo el creador global puede cambiar quien es admin en un viaje.";
     }
 
+    if (errorMessage.toLowerCase().includes("jwt expired") || errorMessage.toLowerCase().includes("sesion ha caducado")) {
+      return "Tu sesion ha caducado. Vuelve a iniciar sesion y repite la invitacion.";
+    }
+
     return errorMessage;
   }
 
@@ -46,11 +50,18 @@ export function MembersScreen() {
     try {
       setSubmitting(true);
       setActionError(null);
-      await createInvitation(inviteEmail);
+      const invitation = await createInvitation(inviteEmail);
       setInviteEmail("");
       setShowInviteForm(false);
+      if (invitation.shareUrl) {
+        await handleCopyLink(invitation.id, invitation.shareUrl);
+      }
     } catch (creationError) {
-      setActionError(creationError instanceof Error ? creationError.message : "No se pudo crear la invitacion.");
+      setActionError(
+        normalizeMemberActionError(
+          creationError instanceof Error ? creationError.message : "No se pudo crear la invitacion."
+        )
+      );
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +136,7 @@ export function MembersScreen() {
             </Button>
           </div>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            El enlace se puede copiar o compartir por WhatsApp desde la lista inferior.
+            Al crearla copiaremos el enlace automaticamente y despues podras reenviarlo manualmente por WhatsApp.
           </p>
         </Card>
       ) : null}

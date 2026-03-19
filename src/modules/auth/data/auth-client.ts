@@ -47,6 +47,28 @@ export const authClient = {
     return nextPath;
   },
 
+  async refreshSession(): Promise<AuthUser | null> {
+    const insforge = getInsforgeClient();
+
+    if (!insforge) {
+      return mockUser;
+    }
+
+    const { data, error } = await insforge.auth.refreshSession();
+
+    if (error) {
+      throw new Error(error.message ?? "No se pudo refrescar la sesion con InsForge.");
+    }
+
+    const sessionUser = data?.user;
+
+    if (!sessionUser?.email) {
+      return null;
+    }
+
+    return normalizeAuthUser(sessionUser);
+  },
+
   async getCurrentUser(): Promise<AuthUser | null> {
     const insforge = getInsforgeClient();
 
@@ -54,13 +76,17 @@ export const authClient = {
       return mockUser;
     }
 
-    const { data, error } = await insforge.auth.getCurrentUser();
+    try {
+      return await this.refreshSession();
+    } catch {
+      const { data, error } = await insforge.auth.getCurrentUser();
 
-    if (error || !data?.user?.email) {
-      return null;
+      if (error || !data?.user?.email) {
+        return null;
+      }
+
+      return normalizeAuthUser(data.user);
     }
-
-    return normalizeAuthUser(data.user);
   },
 
   async signInWithPassword({ email, password }: { email: string; password: string }): Promise<AuthUser> {

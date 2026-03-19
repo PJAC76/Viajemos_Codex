@@ -1,6 +1,7 @@
 import { tripInvitations, tripMembers, trips } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
 import type { AuthUser } from "../../auth/domain/types";
+import { authClient } from "../../auth/data/auth-client";
 import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripRole, TripUpsertInput } from "../domain/types";
 
 const fallbackCoverImage =
@@ -150,6 +151,31 @@ function normalizeScalarRpcValue<T>(data: unknown): T | null {
   }
 
   return data as T;
+}
+
+function isExpiredJwtMessage(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("jwt expired") || normalized.includes("expired jwt") || normalized.includes("token expired");
+}
+
+async function withSessionRefresh<T>(operation: () => Promise<T>) {
+  try {
+    return await operation();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (!isExpiredJwtMessage(message)) {
+      throw error;
+    }
+
+    const refreshedUser = await authClient.refreshSession().catch(() => null);
+
+    if (!refreshedUser) {
+      throw new Error("Tu sesion ha caducado. Vuelve a iniciar sesion para continuar.");
+    }
+
+    return operation();
+  }
 }
 
 async function loadProfilesMap(userIds: string[]) {
@@ -351,40 +377,42 @@ export const tripsQueries = {
       return invitation;
     }
 
-    const revokeExistingResult = await insforge.database
-      .from("trip_invitations")
-      .update({
-        status: "revoked",
-        revoked_at: new Date().toISOString()
-      })
-      .eq("trip_id", tripId)
-      .eq("email", cleanEmail)
-      .eq("status", "pending");
+    return withSessionRefresh(async () => {
+      const revokeExistingResult = await insforge.database
+        .from("trip_invitations")
+        .update({
+          status: "revoked",
+          revoked_at: new Date().toISOString()
+        })
+        .eq("trip_id", tripId)
+        .eq("email", cleanEmail)
+        .eq("status", "pending");
 
-    if (revokeExistingResult.error) {
-      throw new Error(revokeExistingResult.error.message ?? "No se pudo preparar la nueva invitacion.");
-    }
+      if (revokeExistingResult.error) {
+        throw new Error(revokeExistingResult.error.message ?? "No se pudo preparar la nueva invitacion.");
+      }
 
-    const { data, error } = await insforge.database
-      .from("trip_invitations")
-      .insert([
-        {
-          trip_id: tripId,
-          email: cleanEmail,
-          token,
-          status: "pending",
-          invited_by: invitedBy,
-          share_url: shareUrl
-        }
-      ])
-      .select()
-      .single();
+      const { data, error } = await insforge.database
+        .from("trip_invitations")
+        .insert([
+          {
+            trip_id: tripId,
+            email: cleanEmail,
+            token,
+            status: "pending",
+            invited_by: invitedBy,
+            share_url: shareUrl
+          }
+        ])
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error(error.message ?? "No se pudo crear la invitacion.");
-    }
+      if (error) {
+        throw new Error(error.message ?? "No se pudo crear la invitacion.");
+      }
 
-    return normalizeTripInvitation(data as Record<string, unknown>);
+      return normalizeTripInvitation(data as Record<string, unknown>);
+    });
   },
 
   async revokeInvitation(invitationId: string) {
