@@ -92,28 +92,80 @@ function normalizeItineraryItem(row: Record<string, unknown>): ItineraryItem {
 async function ensureTripDays(tripId: string, startDate?: string, endDate?: string) {
   const insforge = getInsforgeClient();
 
-  if (!insforge || !startDate || !endDate) {
+  if (!startDate || !endDate) {
     return;
   }
 
   const desiredDays = buildTripDayRange(startDate, endDate);
+  const desiredDates = new Set(desiredDays.map((day) => day.date));
 
   if (desiredDays.length === 0) {
     return;
   }
 
+  if (!insforge) {
+    for (const desiredDay of desiredDays) {
+      const existingDay = itineraryDays.find((day) => day.tripId === tripId && day.date === desiredDay.date);
+
+      if (existingDay) {
+        existingDay.label = desiredDay.label;
+        existingDay.position = desiredDay.position;
+        continue;
+      }
+
+      itineraryDays.push({
+        id: `day-${crypto.randomUUID()}`,
+        tripId,
+        date: desiredDay.date,
+        label: desiredDay.label,
+        position: desiredDay.position
+      });
+    }
+
+    const removedDayIds = itineraryDays
+      .filter((day) => day.tripId === tripId && !desiredDates.has(day.date))
+      .map((day) => day.id);
+
+    for (const removedDayId of removedDayIds) {
+      const dayIndex = itineraryDays.findIndex((day) => day.id === removedDayId);
+
+      if (dayIndex >= 0) {
+        itineraryDays.splice(dayIndex, 1);
+      }
+    }
+
+    for (let index = itineraryItems.length - 1; index >= 0; index -= 1) {
+      if (removedDayIds.includes(itineraryItems[index].dayId)) {
+        itineraryItems.splice(index, 1);
+      }
+    }
+
+    return;
+  }
+
   const { data, error } = await insforge.database
     .from("itinerary_days")
-    .select("id, date")
+    .select("id, date, label, position")
     .eq("trip_id", tripId);
 
   if (error) {
     throw new Error(error.message ?? "No se pudieron comprobar los dias del itinerario.");
   }
 
-  const existingDates = new Set(((data as Array<Record<string, unknown>> | null) ?? []).map((row) => String(row.date)));
+  const existingRows = (data as Array<Record<string, unknown>> | null) ?? [];
+  const existingByDate = new Map(existingRows.map((row) => [String(row.date), row]));
+  const extraDayIds = existingRows.filter((row) => !desiredDates.has(String(row.date))).map((row) => String(row.id));
+
+  if (extraDayIds.length > 0) {
+    const deleteResult = await insforge.database.from("itinerary_days").delete().in("id", extraDayIds);
+
+    if (deleteResult.error) {
+      throw new Error(deleteResult.error.message ?? "No se pudieron limpiar los dias antiguos del itinerario.");
+    }
+  }
+
   const missingDays = desiredDays
-    .filter((day) => !existingDates.has(day.date))
+    .filter((day) => !existingByDate.has(day.date))
     .map((day) => ({
       trip_id: tripId,
       date: day.date,
@@ -122,6 +174,35 @@ async function ensureTripDays(tripId: string, startDate?: string, endDate?: stri
     }));
 
   if (missingDays.length === 0) {
+    for (const desiredDay of desiredDays) {
+      const existingDay = existingByDate.get(desiredDay.date);
+
+      if (!existingDay) {
+        continue;
+      }
+
+      const nextLabel = desiredDay.label;
+      const nextPosition = desiredDay.position;
+      const currentLabel = typeof existingDay.label === "string" ? existingDay.label : "";
+      const currentPosition = typeof existingDay.position === "number" ? existingDay.position : 0;
+
+      if (currentLabel === nextLabel && currentPosition === nextPosition) {
+        continue;
+      }
+
+      const updateResult = await insforge.database
+        .from("itinerary_days")
+        .update({
+          label: nextLabel,
+          position: nextPosition
+        })
+        .eq("id", String(existingDay.id));
+
+      if (updateResult.error) {
+        throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
+      }
+    }
+
     return;
   }
 
@@ -129,6 +210,35 @@ async function ensureTripDays(tripId: string, startDate?: string, endDate?: stri
 
   if (insertResult.error) {
     throw new Error(insertResult.error.message ?? "No se pudieron crear los dias del itinerario.");
+  }
+
+  for (const desiredDay of desiredDays) {
+    const existingDay = existingByDate.get(desiredDay.date);
+
+    if (!existingDay) {
+      continue;
+    }
+
+    const nextLabel = desiredDay.label;
+    const nextPosition = desiredDay.position;
+    const currentLabel = typeof existingDay.label === "string" ? existingDay.label : "";
+    const currentPosition = typeof existingDay.position === "number" ? existingDay.position : 0;
+
+    if (currentLabel === nextLabel && currentPosition === nextPosition) {
+      continue;
+    }
+
+    const updateResult = await insforge.database
+      .from("itinerary_days")
+      .update({
+        label: nextLabel,
+        position: nextPosition
+      })
+      .eq("id", String(existingDay.id));
+
+    if (updateResult.error) {
+      throw new Error(updateResult.error.message ?? "No se pudo actualizar la secuencia del itinerario.");
+    }
   }
 }
 
