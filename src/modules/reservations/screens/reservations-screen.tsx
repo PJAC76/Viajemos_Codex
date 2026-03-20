@@ -171,6 +171,9 @@ export function ReservationsScreen() {
               </Button>
             }
           />
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            Son obligatorios el titulo, inicio, fin, estado y numero de personas. El resto de campos son opcionales.
+          </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tipo</p>
@@ -319,7 +322,7 @@ export function ReservationsScreen() {
           <div className="mt-5 flex flex-wrap gap-3">
             <Button
               onClick={() => void handleSaveReservation()}
-              disabled={submitting || !form.title.trim() || !form.confirmationCode.trim() || !form.startAt}
+              disabled={submitting || !form.title.trim() || !form.startAt || !form.endAt || !form.status || !form.partySize}
             >
               {submitting ? "Guardando..." : editingReservationId ? "Actualizar reserva" : "Guardar reserva"}
             </Button>

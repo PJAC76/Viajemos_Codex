@@ -8,6 +8,7 @@ import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { formatDateLabel } from "../../../lib/utils";
+import { mapsRouteService } from "../../../services/maps-route-service";
 import { usePlacesCatalog } from "../../places/data/use-places-data";
 import type { Place } from "../../places/domain/types";
 import { useTripOverview, useTripPermission } from "../../trips/data/use-trips-data";
@@ -95,6 +96,10 @@ export function ItineraryScreen() {
   const activeItems = activeDay ? itemsByDay.get(activeDay.id) ?? [] : [];
   const linkedPlaces = useMemo(() => places.filter((place) => place.type !== "place" || place.address), [places]);
   const { snapshot: routeSnapshot, loading: routeLoading } = useRouteSnapshot(tripId, activeDay?.id);
+  const externalMapsUrl = useMemo(
+    () => mapsRouteService.buildGoogleMapsDirectionsUrl(activeItems, "driving"),
+    [activeItems]
+  );
 
   function resetForm() {
     setShowForm(false);
@@ -266,9 +271,16 @@ export function ItineraryScreen() {
             </p>
           </div>
           {tripId && activeDay ? (
-            <Link to={`/trips/${tripId}/map`}>
-              <Button>Ir a mapa y rutas</Button>
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link to={`/trips/${tripId}/map`}>
+                <Button>Ir a mapa y rutas</Button>
+              </Link>
+              {externalMapsUrl ? (
+                <a href={externalMapsUrl} target="_blank" rel="noreferrer">
+                  <Button variant="secondary">Abrir en Google Maps</Button>
+                </a>
+              ) : null}
+            </div>
           ) : null}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">

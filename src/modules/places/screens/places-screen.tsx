@@ -136,6 +136,9 @@ export function PlacesScreen() {
               </Button>
             }
           />
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            Solo nombre y direccion son obligatorios. El resto de campos son opcionales.
+          </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tipo</p>

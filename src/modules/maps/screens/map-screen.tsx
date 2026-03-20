@@ -52,6 +52,10 @@ export function MapScreen() {
       `${activeDay?.id ?? "day"}:${travelMode}:${activeDayItems.map((item) => `${item.id}:${item.order}:${item.address}`).join("|")}`,
     [activeDay?.id, activeDayItems, travelMode]
   );
+  const externalMapsUrl = useMemo(
+    () => mapsRouteService.buildGoogleMapsDirectionsUrl(activeDayItems, travelMode),
+    [activeDayItems, travelMode]
+  );
 
   useEffect(() => {
     if (settings?.defaultMapMode) {
@@ -186,12 +190,19 @@ export function MapScreen() {
         title="Mapa y ruta optimizada"
         description="El calculo usa el orden del itinerario. Si Google Maps falla o no esta configurado, el plan diario sigue operativo."
         action={
-          <Button
-            onClick={() => void handleCalculateRoute(true)}
-            disabled={!activeDay || !hasStopsToRoute || !hasGoogleMapsEnv || calculating || saving}
-          >
-            {calculating || saving ? "Calculando..." : "Recalcular ruta"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => void handleCalculateRoute(true)}
+              disabled={!activeDay || !hasStopsToRoute || !hasGoogleMapsEnv || calculating || saving}
+            >
+              {calculating || saving ? "Calculando..." : "Recalcular ruta"}
+            </Button>
+            {externalMapsUrl ? (
+              <a href={externalMapsUrl} target="_blank" rel="noreferrer">
+                <Button variant="secondary">Abrir en Google Maps</Button>
+              </a>
+            ) : null}
+          </div>
         }
       />
 
@@ -319,6 +330,16 @@ export function MapScreen() {
             </div>
             {mapMessage ? <p className="mt-4 text-sm font-medium text-amber-600">{mapMessage}</p> : null}
             {snapshotError ? <p className="mt-2 text-sm font-medium text-rose-600">{snapshotError}</p> : null}
+            {externalMapsUrl ? (
+              <a
+                href={externalMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex text-sm font-semibold text-primary"
+              >
+                Abrir esta ruta directamente en Google Maps
+              </a>
+            ) : null}
           </Card>
 
           <Card className="p-5">

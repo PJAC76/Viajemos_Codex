@@ -146,6 +146,35 @@ export const mapsRouteService = {
     return getRoutableItems(items).length >= 2;
   },
 
+  buildGoogleMapsDirectionsUrl(items: ItineraryItem[], travelMode: RouteTravelMode = "driving") {
+    const routeItems = getRoutableItems(items);
+
+    if (routeItems.length === 0) {
+      return null;
+    }
+
+    if (routeItems.length === 1) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(routeItems[0].address)}`;
+    }
+
+    const origin = routeItems[0].address;
+    const destination = routeItems[routeItems.length - 1].address;
+    const waypoints = routeItems.slice(1, -1).map((item) => item.address).filter(Boolean);
+    const normalizedTravelMode = travelMode === "walking" ? "walking" : travelMode === "transit" ? "transit" : "driving";
+    const params = new URLSearchParams({
+      api: "1",
+      origin,
+      destination,
+      travelmode: normalizedTravelMode
+    });
+
+    if (waypoints.length > 0) {
+      params.set("waypoints", waypoints.join("|"));
+    }
+
+    return `https://www.google.com/maps/dir/?${params.toString()}`;
+  },
+
   async calculateAndRenderDayRoute({
     container,
     items,
