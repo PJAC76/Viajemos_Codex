@@ -1,5 +1,6 @@
 import { tripInvitations, tripMembers, trips } from "../../../mocks/db";
 import { getInsforgeClient } from "../../../lib/insforge/client";
+import { storageService } from "../../../services/storage-service";
 import type { AuthUser } from "../../auth/domain/types";
 import { authClient } from "../../auth/data/auth-client";
 import type { Trip, TripInvitation, TripInvitationPreview, TripMember, TripRole, TripUpsertInput } from "../domain/types";
@@ -194,6 +195,33 @@ async function loadProfilesMap(userIds: string[]) {
   return new Map(
     ((data as Array<Record<string, unknown>> | null) ?? []).map((profile) => [String(profile.user_id), profile])
   );
+}
+
+async function listTripStorageKeys(tripId: string) {
+  const insforge = getInsforgeClient();
+
+  if (!insforge) {
+    return [] as string[];
+  }
+
+  const [documentsResult, receiptsResult] = await Promise.all([
+    insforge.database.from("documents").select("storage_key").eq("trip_id", tripId),
+    insforge.database.from("expense_receipts").select("storage_key").eq("trip_id", tripId)
+  ]);
+
+  if (documentsResult.error) {
+    throw new Error(documentsResult.error.message ?? "No se pudieron revisar los documentos del viaje.");
+  }
+
+  if (receiptsResult.error) {
+    throw new Error(receiptsResult.error.message ?? "No se pudieron revisar los tickets del viaje.");
+  }
+
+  const keys = [...((documentsResult.data as Array<Record<string, unknown>> | null) ?? []), ...((receiptsResult.data as Array<Record<string, unknown>> | null) ?? [])]
+    .map((row) => (typeof row.storage_key === "string" ? row.storage_key : ""))
+    .filter(Boolean);
+
+  return [...new Set(keys)];
 }
 
 export const tripsQueries = {
@@ -623,6 +651,10 @@ export const tripsQueries = {
     if (!insforge) {
       return;
     }
+
+    const storageKeys = await listTripStorageKeys(tripId);
+
+    await Promise.all(storageKeys.map((path) => storageService.deleteTripFile(path).catch(() => undefined)));
 
     const { error } = await insforge.database.from("trips").delete().eq("id", tripId);
 

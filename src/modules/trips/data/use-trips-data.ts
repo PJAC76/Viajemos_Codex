@@ -41,12 +41,18 @@ export function useTripsList() {
     return nextTrip;
   }
 
+  async function deleteTrip(tripId: string) {
+    await tripsQueries.deleteTrip(tripId);
+    setTrips((currentTrips) => currentTrips.filter((trip) => trip.id !== tripId));
+  }
+
   return {
     trips,
     loading,
     error,
     reload,
-    createTrip
+    createTrip,
+    deleteTrip
   };
 }
 

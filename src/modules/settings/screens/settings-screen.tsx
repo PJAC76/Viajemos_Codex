@@ -4,18 +4,22 @@ import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
+import { formatDateRange } from "../../../lib/utils";
+import { tripsQueries } from "../../trips/data/trips-queries";
 import { useTripsList } from "../../trips/data/use-trips-data";
 import { useUserSettings } from "../data/use-user-settings";
 import { defaultUserSettings, type UserSettingsUpdateInput } from "../domain/types";
 
 export function SettingsScreen() {
-  const { trips, loading: tripsLoading } = useTripsList();
+  const { trips, loading: tripsLoading, deleteTrip: deleteTripFromList } = useTripsList();
   const { settings, loading, error, reload, updateSettings } = useUserSettings();
   const [form, setForm] = useState<UserSettingsUpdateInput>(defaultUserSettings);
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isMasterUser, setIsMasterUser] = useState(false);
+  const [managingTrips, setManagingTrips] = useState(false);
 
   useEffect(() => {
     if (!settings) {
@@ -42,6 +46,27 @@ export function SettingsScreen() {
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    tripsQueries
+      .isGlobalAdmin()
+      .then((value) => {
+        if (active) {
+          setIsMasterUser(value);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setIsMasterUser(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const preferredTripOptions = useMemo(
     () => trips.slice().sort((left, right) => left.startDate.localeCompare(right.startDate)),
     [trips]
@@ -65,6 +90,32 @@ export function SettingsScreen() {
     setForm(defaultUserSettings);
     setActionError(null);
     setSuccessMessage(null);
+  }
+
+  async function handleDeleteTrip(tripId: string, tripTitle: string) {
+    const confirmed = window.confirm(
+      `Vas a borrar por completo el viaje "${tripTitle}". Esta accion eliminara reservas, itinerario, gastos, documentos y mensajes asociados.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setManagingTrips(true);
+      setActionError(null);
+      setSuccessMessage(null);
+      await deleteTripFromList(tripId);
+      setForm((current) => ({
+        ...current,
+        preferredTripId: current.preferredTripId === tripId ? undefined : current.preferredTripId
+      }));
+      setSuccessMessage(`El viaje "${tripTitle}" se ha borrado por completo.`);
+    } catch (deleteError) {
+      setActionError(deleteError instanceof Error ? deleteError.message : "No se pudo borrar el viaje seleccionado.");
+    } finally {
+      setManagingTrips(false);
+    }
   }
 
   if (loading || tripsLoading) {
@@ -248,6 +299,43 @@ export function SettingsScreen() {
               <p>Moneda del MVP: EUR para todos los viajes y liquidaciones.</p>
             </div>
           </Card>
+
+          {isMasterUser ? (
+            <Card className="p-6">
+              <SectionHeader
+                title="Control Master"
+                description="Borrado total de viajes reservado al usuario Master. La accion elimina tambien los adjuntos privados asociados."
+              />
+              <div className="mt-5 space-y-4">
+                {preferredTripOptions.length === 0 ? (
+                  <EmptyState
+                    title="No hay viajes que administrar"
+                    description="En cuanto existan viajes en la plataforma, podras borrarlos por completo desde aqui."
+                  />
+                ) : (
+                  preferredTripOptions.map((trip) => (
+                    <div
+                      key={trip.id}
+                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-bold text-slate-900 dark:text-white">{trip.title}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{trip.destination}</p>
+                        <p className="text-xs text-slate-400">{formatDateRange(trip.startDate, trip.endDate)}</p>
+                      </div>
+                      <Button
+                        variant="danger"
+                        onClick={() => void handleDeleteTrip(trip.id, trip.title)}
+                        disabled={managingTrips}
+                      >
+                        {managingTrips ? "Borrando..." : "Borrar viaje por completo"}
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          ) : null}
         </div>
       </div>
 

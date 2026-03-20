@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { itineraryItems } from "../../../mocks/db";
 import { EmptyState } from "../../../components/states/empty-state";
@@ -12,12 +12,14 @@ import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
+import { formatCurrency } from "../../../lib/utils";
+import { useExpenses } from "../../expenses/data/use-expenses-data";
 import { useTripOverview, useTripPermission } from "../data/use-trips-data";
 
 export function DashboardScreen() {
   const navigate = useNavigate();
   const { tripId } = useParams();
-  const { trip, members, loading, error, updateTrip, deleteTrip } = useTripOverview(tripId);
+  const { trip, members, loading, error, updateTrip } = useTripOverview(tripId);
   const { isAdmin } = useTripPermission(tripId);
   const [editing, setEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +31,11 @@ export function DashboardScreen() {
   const [endDate, setEndDate] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const upcoming = itineraryItems.filter((item) => item.tripId === tripId).slice(0, 3);
+  const memberNames = useMemo(
+    () => Object.fromEntries(members.map((member) => [member.userId, member.displayName])),
+    [members]
+  );
+  const { totalAmount, expenses, loading: expensesLoading } = useExpenses(tripId, memberNames);
 
   useEffect(() => {
     if (!trip) {
@@ -63,19 +70,6 @@ export function DashboardScreen() {
     }
   }
 
-  async function handleDeleteTrip() {
-    try {
-      setSubmitting(true);
-      setFormError(null);
-      await deleteTrip();
-      navigate("/trips");
-    } catch (deleteError) {
-      setFormError(deleteError instanceof Error ? deleteError.message : "No se pudo borrar el viaje.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   if (loading) {
     return <div className="flex min-h-[40vh] items-center justify-center text-sm text-slate-500">Cargando resumen...</div>;
   }
@@ -101,7 +95,12 @@ export function DashboardScreen() {
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Estado" value={trip.status === "active" ? "Activo" : trip.status === "draft" ? "Borrador" : "Cerrado"} icon="schedule" />
         <StatCard label="Miembros activos" value={String(members.filter((member) => member.status === "active").length)} icon="groups" />
-        <StatCard label="Moneda" value={trip.currency} icon="payments" hint="MVP limitado a EUR" />
+        <StatCard
+          label="Gasto total"
+          value={expensesLoading ? "Cargando..." : formatCurrency(totalAmount)}
+          icon="payments"
+          hint={expenses.length > 0 ? `${expenses.length} gastos registrados` : "Aun no hay gastos registrados"}
+        />
       </div>
 
       {editing ? (
@@ -154,9 +153,6 @@ export function DashboardScreen() {
             </Button>
             <Button variant="secondary" onClick={() => setEditing(false)} disabled={submitting}>
               Cancelar
-            </Button>
-            <Button variant="danger" onClick={() => void handleDeleteTrip()} disabled={submitting}>
-              Borrar viaje
             </Button>
           </div>
         </Card>
