@@ -51,8 +51,8 @@ export function AppShell() {
   const mobileSubtitle = activeTrip ? activeTripLink?.label ?? "Viaje privado" : "Tribu Trip";
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
+    <div className="min-h-screen overflow-x-hidden bg-background-light dark:bg-background-dark">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] overflow-x-hidden">
         <aside
           className={cn(
             "hidden w-72 shrink-0 border-r border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 xl:flex xl:flex-col",
@@ -107,7 +107,7 @@ export function AppShell() {
           </button>
         </aside>
 
-        <div className="flex min-h-screen flex-1 flex-col">
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
           <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
             <div className="xl:hidden">
               <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -224,11 +224,11 @@ export function AppShell() {
 
           <main
             className={cn(
-              "flex-1 w-full px-4 pb-24 pt-5 md:px-6 md:pt-6 xl:max-w-none xl:px-8 xl:pb-8",
+              "flex-1 w-full min-w-0 overflow-x-hidden px-4 pb-24 pt-5 md:px-6 md:pt-6 xl:max-w-none xl:px-8 xl:pb-8",
               compactMode ? "xl:py-6" : "xl:py-8"
             )}
           >
-            <div className="mx-auto w-full max-w-[480px] xl:max-w-none">
+            <div className="mx-auto w-full min-w-0 max-w-[480px] overflow-x-hidden xl:max-w-none">
               <Outlet />
             </div>
           </main>
