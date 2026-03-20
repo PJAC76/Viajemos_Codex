@@ -10,12 +10,12 @@ export function SectionHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4">
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
+    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">{title}</h2>
         {description ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p> : null}
       </div>
-      {action}
+      {action ? <div className="w-full sm:w-auto [&>*]:w-full sm:[&>*]:w-auto">{action}</div> : null}
     </div>
   );
 }
