@@ -156,6 +156,13 @@ export function MapScreen() {
 
   const isLoading = tripLoading || itineraryLoading;
   const hasStopsToRoute = mapsRouteService.canCalculateRoute(activeDayItems);
+  const orderedStops = useMemo(() => {
+    if (!route || route.segments.length === 0) {
+      return [];
+    }
+
+    return [route.segments[0].from, ...route.segments.map((segment) => segment.to)];
+  }, [route]);
   const travelModeLabels: Array<{ id: RouteTravelMode; label: string; icon: string }> = [
     { id: "driving", label: "Coche", icon: "directions_car" },
     { id: "walking", label: "A pie", icon: "directions_walk" },
@@ -353,20 +360,34 @@ export function MapScreen() {
                   description="Anade al menos dos eventos con direccion valida en el itinerario para calcular el trayecto del dia."
                 />
               ) : route ? (
-                route.segments.map((segment) => (
-                  <div key={`${segment.from}-${segment.to}`} className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-white">{segment.from}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">hasta {segment.to}</p>
+                <div className="space-y-3">
+                  {route.segments.map((segment, index) => (
+                    <div key={`${segment.from}-${segment.to}`} className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-slate-900 dark:text-white">{segment.from}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">hasta {segment.to}</p>
+                        </div>
+                        <div className="text-right text-sm font-semibold text-primary">
+                          <p>{segment.distanceKm} km</p>
+                          <p>{segment.durationMinutes} min</p>
+                        </div>
                       </div>
-                      <div className="text-right text-sm font-semibold text-primary">
-                        <p>{segment.distanceKm} km</p>
-                        <p>{segment.durationMinutes} min</p>
-                      </div>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Parada {index + 1} de {orderedStops.length}
+                      </p>
                     </div>
-                  </div>
-                ))
+                  ))}
+                  {orderedStops.length > 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Parada final {orderedStops.length} de {orderedStops.length}
+                      </p>
+                      <p className="mt-2 font-semibold text-slate-900 dark:text-white">{orderedStops[orderedStops.length - 1]}</p>
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Destino final de la ruta optimizada del dia.</p>
+                    </div>
+                  ) : null}
+                </div>
               ) : (
                 <EmptyState
                   title="Aun no hay ruta guardada"
