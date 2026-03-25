@@ -7,6 +7,27 @@ import type { Place, PlaceUpsertInput } from "../domain/types";
 const fallbackPlaceImage =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
 
+function normalizePlaceImageUrl(value: unknown) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return fallbackPlaceImage;
+  }
+
+  const rawUrl = value.trim();
+
+  try {
+    const parsedUrl = new URL(rawUrl);
+
+    if (parsedUrl.hostname === "commons.wikimedia.org" && parsedUrl.pathname.startsWith("/wiki/File:")) {
+      const fileName = parsedUrl.pathname.slice("/wiki/File:".length);
+      return `https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}`;
+    }
+
+    return rawUrl;
+  } catch {
+    return rawUrl;
+  }
+}
+
 function normalizePlaceType(value: unknown): Place["type"] {
   return value === "hotel" || value === "restaurant" || value === "place" ? value : "place";
 }
@@ -29,7 +50,7 @@ function normalizePlace(
     name: typeof row.name === "string" ? row.name : "Lugar sin nombre",
     address: typeof row.address === "string" ? row.address : "",
     rating: typeof row.rating === "number" ? row.rating : undefined,
-    image: typeof row.image_url === "string" && row.image_url.length > 0 ? row.image_url : fallbackPlaceImage,
+    image: normalizePlaceImageUrl(row.image_url),
     latitude: typeof row.latitude === "number" ? row.latitude : undefined,
     longitude: typeof row.longitude === "number" ? row.longitude : undefined,
     phone: typeof row.phone === "string" ? row.phone : undefined,

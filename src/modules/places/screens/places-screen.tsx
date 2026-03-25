@@ -12,6 +12,9 @@ import { useTripPermission } from "../../trips/data/use-trips-data";
 import { usePlacesCatalog } from "../data/use-places-data";
 import type { Place, PlaceType, PlaceUpsertInput } from "../domain/types";
 
+const fallbackPlaceImage =
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
+
 const emptyPlaceForm: PlaceUpsertInput = {
   type: "place",
   name: "",
@@ -229,7 +232,23 @@ export function PlacesScreen() {
           {places.map((place) => (
             <Card key={place.id} className="overflow-hidden">
               <div className="relative aspect-[16/10] w-full bg-slate-200">
-                {place.image ? <img src={place.image} alt={place.name} className="h-full w-full object-cover" /> : null}
+                {place.image ? (
+                  <img
+                    src={place.image}
+                    alt={place.name}
+                    className="h-full w-full object-cover"
+                    onError={(event) => {
+                      const target = event.currentTarget;
+
+                      if (target.dataset.fallbackApplied === "true") {
+                        return;
+                      }
+
+                      target.dataset.fallbackApplied = "true";
+                      target.src = fallbackPlaceImage;
+                    }}
+                  />
+                ) : null}
                 <div className="absolute left-3 top-3 flex flex-wrap gap-2">
                   <Badge className="bg-white/90 text-primary">
                     {place.type === "hotel" ? "Hotel" : place.type === "restaurant" ? "Restaurante" : "Lugar"}
