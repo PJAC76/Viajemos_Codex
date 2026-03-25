@@ -52,6 +52,31 @@ interface GoogleMapsNamespace {
   };
 }
 
+interface GoogleMapsAuthorAttribution {
+  displayName?: string;
+  uri?: string;
+}
+
+interface GoogleMapsPhotoOptions {
+  maxWidth?: number;
+  maxHeight?: number;
+}
+
+interface GoogleMapsPhoto {
+  authorAttributions?: GoogleMapsAuthorAttribution[];
+  getURI: (options?: GoogleMapsPhotoOptions) => string;
+}
+
+interface GoogleMapsPlaceSearchResult {
+  id?: string;
+  displayName?: string;
+  photos?: GoogleMapsPhoto[];
+}
+
+interface GoogleMapsPlaceSearchResponse {
+  places?: GoogleMapsPlaceSearchResult[];
+}
+
 declare global {
   interface Window {
     google?: GoogleMapsNamespace;
@@ -74,7 +99,22 @@ interface LoadedGoogleMaps {
   };
 }
 
-let googleMapsPromise: Promise<LoadedGoogleMaps> | null = null;
+interface LoadedGooglePlaces {
+  google: GoogleMapsNamespace;
+  placesLibrary: {
+    Place: {
+      searchByText: (request: {
+        textQuery: string;
+        fields: string[];
+        language?: string;
+        region?: string;
+        maxResultCount?: number;
+      }) => Promise<GoogleMapsPlaceSearchResponse>;
+    };
+  };
+}
+
+let googleNamespacePromise: Promise<GoogleMapsNamespace> | null = null;
 
 function getTravelMode(travelMode: RouteTravelMode): GoogleMapsTravelMode {
   if (travelMode === "walking") {
@@ -98,20 +138,20 @@ function getRouteLocation(item: ItineraryItem) {
   return item.address.trim() || item.title.trim();
 }
 
-async function loadGoogleMaps() {
+async function loadGoogleMapsNamespace() {
   if (window.google?.maps?.importLibrary) {
-    return resolveLibraries(window.google);
+    return window.google;
   }
 
   if (!env.googleMapsApiKey) {
     throw new Error("Configura VITE_GOOGLE_MAPS_API_KEY para calcular rutas reales.");
   }
 
-  if (googleMapsPromise) {
-    return googleMapsPromise;
+  if (googleNamespacePromise) {
+    return googleNamespacePromise;
   }
 
-  googleMapsPromise = new Promise<GoogleMapsNamespace>((resolve, reject) => {
+  googleNamespacePromise = new Promise<GoogleMapsNamespace>((resolve, reject) => {
     const existingScript = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
 
     if (existingScript) {
@@ -149,20 +189,20 @@ async function loadGoogleMaps() {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(env.googleMapsApiKey)}&loading=async&callback=${GOOGLE_MAPS_CALLBACK}&v=weekly`;
     script.onerror = () => reject(new Error("No se pudo descargar Google Maps."));
     document.head.appendChild(script);
-  })
-    .then((google) => resolveLibraries(google))
-    .finally(() => {
+  }).finally(() => {
       delete window[GOOGLE_MAPS_CALLBACK];
     })
     .catch((error) => {
-    googleMapsPromise = null;
+    googleNamespacePromise = null;
     throw error;
   });
 
-  return googleMapsPromise;
+  return googleNamespacePromise;
 }
 
-async function resolveLibraries(google: GoogleMapsNamespace): Promise<LoadedGoogleMaps> {
+async function loadGoogleMaps(): Promise<LoadedGoogleMaps> {
+  const google = await loadGoogleMapsNamespace();
+
   if (!google.maps.importLibrary) {
     throw new Error("Google Maps no ha expuesto importLibrary correctamente.");
   }
@@ -178,6 +218,25 @@ async function resolveLibraries(google: GoogleMapsNamespace): Promise<LoadedGoog
     google,
     mapsLibrary,
     routesLibrary
+  };
+}
+
+async function loadGooglePlaces(): Promise<LoadedGooglePlaces> {
+  const google = await loadGoogleMapsNamespace();
+
+  if (!google.maps.importLibrary) {
+    throw new Error("Google Maps no ha expuesto importLibrary correctamente.");
+  }
+
+  const placesLibrary = (await google.maps.importLibrary("places")) as LoadedGooglePlaces["placesLibrary"];
+
+  if (!placesLibrary.Place?.searchByText) {
+    throw new Error("Google Places no esta disponible para buscar fotos.");
+  }
+
+  return {
+    google,
+    placesLibrary
   };
 }
 
@@ -227,6 +286,35 @@ export const mapsRouteService = {
     }
 
     return `https://www.google.com/maps/dir/?${params.toString()}`;
+  },
+
+  async searchPlacePhoto(query: string) {
+    const normalizedQuery = query.trim();
+
+    if (!normalizedQuery) {
+      return null;
+    }
+
+    const loadedGooglePlaces = await loadGooglePlaces();
+    const response = await loadedGooglePlaces.placesLibrary.Place.searchByText({
+      textQuery: normalizedQuery,
+      fields: ["displayName", "photos"],
+      language: "es",
+      region: "es",
+      maxResultCount: 1
+    });
+    const place = response.places?.[0];
+    const photo = place?.photos?.[0];
+
+    if (!photo) {
+      return null;
+    }
+
+    return {
+      imageUrl: photo.getURI({ maxWidth: 320, maxHeight: 220 }),
+      attribution: photo.authorAttributions?.[0] ?? null,
+      title: place?.displayName ?? normalizedQuery
+    };
   },
 
   async calculateAndRenderDayRoute({

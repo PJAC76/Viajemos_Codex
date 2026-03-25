@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DayRoutePreview } from "../../../components/maps/day-route-preview";
+import { UpcomingStopPhoto } from "../../../components/maps/upcoming-stop-photo";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { MemberStack } from "../../../components/trips/member-stack";
@@ -197,7 +198,7 @@ export function DashboardScreen() {
               {upcoming.map((item) => (
                 <Card key={item.id} className="overflow-hidden p-4">
                   <div className="flex flex-col gap-4 md:flex-row">
-                    <div className="h-28 w-full rounded-xl bg-slate-100 md:w-32" />
+                    <UpcomingStopPhoto title={item.title} address={item.address} />
                     <div className="flex-1">
                       <Badge>{item.startTime}</Badge>
                       <h3 className="mt-2 text-xl font-bold text-slate-900 dark:text-white">{item.title}</h3>
