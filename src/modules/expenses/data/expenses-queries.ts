@@ -42,6 +42,10 @@ function toExpenseActionError(message: string | undefined, fallback: string) {
     return "La liquidacion del viaje ya esta cerrada y no admite mas cambios economicos.";
   }
 
+  if (message.includes("PAYER_NOT_ACTIVE")) {
+    return "El usuario seleccionado en 'Pagado por' no es un miembro activo del viaje. Elige uno de los participantes activos.";
+  }
+
   return message;
 }
 

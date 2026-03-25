@@ -22,6 +22,14 @@ function formatExpenseDate(date: string) {
   return new Intl.DateTimeFormat("es-ES", { dateStyle: "medium" }).format(new Date(date));
 }
 
+function getDefaultPayerId(activeMemberIds: string[], currentUserId?: string) {
+  if (currentUserId && activeMemberIds.includes(currentUserId)) {
+    return currentUserId;
+  }
+
+  return activeMemberIds[0] ?? "";
+}
+
 function downloadExpensesCsv(expenses: Expense[]) {
   const rows = [
     ["Concepto", "Categoria", "Pagado por", "Fecha", "Importe", "Participantes", "Descripcion"].join(";"),
@@ -63,6 +71,7 @@ export function ExpensesScreen() {
     () => members.filter((member) => member.status === "active"),
     [members]
   );
+  const activeMemberIds = useMemo(() => activeMembers.map((member) => member.userId), [activeMembers]);
   const { categories, expenses, totalAmount, loading, error, createExpense, updateExpense, deleteExpense, reload } = useExpenses(
     tripId,
     userNames
@@ -115,11 +124,13 @@ export function ExpensesScreen() {
     if (!showForm && activeMembers.length > 0) {
       setForm((current) => ({
         ...current,
-        paidBy: current.paidBy || user?.id || activeMembers[0].userId,
-        splitBetween: current.splitBetween.length > 0 ? current.splitBetween : activeMembers.map((member) => member.userId)
+        paidBy: activeMemberIds.includes(current.paidBy)
+          ? current.paidBy
+          : getDefaultPayerId(activeMemberIds, user?.id),
+        splitBetween: current.splitBetween.length > 0 ? current.splitBetween : activeMemberIds
       }));
     }
-  }, [activeMembers, showForm, user?.id]);
+  }, [activeMemberIds, activeMembers.length, showForm, user?.id]);
 
   const isSettlementClosed = trip?.settlementStatus === "closed";
 
@@ -150,9 +161,9 @@ export function ExpensesScreen() {
       concept: "",
       categoryId: categories[0]?.id ?? "cat-food",
       amount: 0,
-      paidBy: user?.id ?? activeMembers[0]?.userId ?? "",
+      paidBy: getDefaultPayerId(activeMemberIds, user?.id),
       date: new Date().toISOString().slice(0, 10),
-      splitBetween: activeMembers.map((member) => member.userId),
+      splitBetween: activeMemberIds,
       description: ""
     });
   }
@@ -171,9 +182,9 @@ export function ExpensesScreen() {
       concept: "",
       categoryId: categories[0]?.id ?? "cat-food",
       amount: 0,
-      paidBy: user?.id ?? activeMembers[0]?.userId ?? "",
+      paidBy: getDefaultPayerId(activeMemberIds, user?.id),
       date: new Date().toISOString().slice(0, 10),
-      splitBetween: activeMembers.map((member) => member.userId),
+      splitBetween: activeMemberIds,
       description: ""
     });
   }
