@@ -72,18 +72,28 @@ function normalizeInvitationStatus(value: unknown): TripInvitation["status"] {
 
 function normalizeTripInvitationPreview(row: Record<string, unknown>): TripInvitationPreview {
   return {
-    id: String(row.id),
-    tripId: String(row.trip_id),
+    id: String(row.invitation_id ?? row.id),
+    tripId: String(row.invitation_trip_id ?? row.trip_id),
     tripTitle: typeof row.trip_title === "string" ? row.trip_title : "Viaje privado",
     destination: typeof row.trip_destination === "string" ? row.trip_destination : "Destino pendiente",
     coverImage: typeof row.trip_cover_image === "string" ? row.trip_cover_image : undefined,
     startDate: typeof row.trip_start_date === "string" ? row.trip_start_date : "",
     endDate: typeof row.trip_end_date === "string" ? row.trip_end_date : "",
-    email: typeof row.email === "string" ? row.email : "",
-    status: normalizeInvitationStatus(row.status),
-    invitedBy: typeof row.invited_by === "string" ? row.invited_by : "",
-    invitedByName: typeof row.invited_by_name === "string" ? row.invited_by_name : "Admin del viaje",
-    shareUrl: typeof row.share_url === "string" ? row.share_url : undefined,
+    email: typeof row.invitation_email === "string" ? row.invitation_email : typeof row.email === "string" ? row.email : "",
+    status: normalizeInvitationStatus(row.invitation_status ?? row.status),
+    invitedBy: typeof row.invitation_invited_by === "string" ? row.invitation_invited_by : typeof row.invited_by === "string" ? row.invited_by : "",
+    invitedByName:
+      typeof row.invitation_invited_by_name === "string"
+        ? row.invitation_invited_by_name
+        : typeof row.invited_by_name === "string"
+          ? row.invited_by_name
+          : "Admin del viaje",
+    shareUrl:
+      typeof row.invitation_share_url === "string"
+        ? row.invitation_share_url
+        : typeof row.share_url === "string"
+          ? row.share_url
+          : undefined,
     viewerEmail: typeof row.viewer_email === "string" ? row.viewer_email : undefined,
     viewerMatchesEmail: Boolean(row.viewer_matches_email)
   };
@@ -566,7 +576,7 @@ export const tripsQueries = {
     }
 
     const rows = normalizeRpcRows(data);
-    const tripId = rows[0]?.trip_id;
+    const tripId = rows[0]?.result_trip_id ?? rows[0]?.trip_id;
 
     if (typeof tripId !== "string") {
       throw new Error("La invitacion se acepto, pero no pudimos abrir el viaje.");

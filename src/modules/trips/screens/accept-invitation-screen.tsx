@@ -45,7 +45,6 @@ export function AcceptInvitationScreen() {
       setSubmitting(true);
       setActionError(null);
       const result = await tripsQueries.acceptInvitation(token);
-      await reload();
       navigate(`/trips/${result.tripId}/summary`, { replace: true });
     } catch (acceptError) {
       setActionError(
