@@ -8,6 +8,7 @@ declare
   item_id uuid;
   next_position integer := 1;
   day_trip_id uuid;
+  order_offset integer := 1000;
 begin
   select trip_id
   into day_trip_id
@@ -23,9 +24,14 @@ begin
     raise exception 'ADMIN_REQUIRED';
   end if;
 
+  select coalesce(max(order_index), 0) + 1000
+  into order_offset
+  from public.itinerary_items
+  where day_id = target_day_id;
+
   update public.itinerary_items
   set
-    order_index = order_index + 1000,
+    order_index = order_index + order_offset,
     updated_at = now()
   where day_id = target_day_id;
 

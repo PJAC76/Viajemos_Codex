@@ -127,19 +127,30 @@ export function useItinerary(tripId?: string, startDate?: string, endDate?: stri
 
   async function saveOptimizedOrder(dayId: string, orderedItemIds: string[]) {
     const dayItems = items.filter((item) => item.dayId === dayId);
-    const orderedItems = orderedItemIds
-      .map((itemId, index) => {
-        const item = dayItems.find((entry) => entry.id === itemId);
+    const optimizedIds = new Set(orderedItemIds);
+    const orderedItems = [
+      ...orderedItemIds
+        .map((itemId, index) => {
+          const item = dayItems.find((entry) => entry.id === itemId);
 
-        if (!item) {
-          return null;
-        }
+          if (!item) {
+            return null;
+          }
 
-        return {
-          ...item,
-          order: index + 1
-        };
-      })
+          return {
+            ...item,
+            order: index + 1
+          };
+        })
+        .filter(Boolean),
+      ...dayItems
+        .filter((item) => !optimizedIds.has(item.id))
+        .sort((left, right) => left.order - right.order)
+    ]
+      .map((item, index) => ({
+        ...item,
+        order: index + 1
+      }))
       .filter(Boolean) as ItineraryItem[];
 
     if (orderedItems.length === 0) {
