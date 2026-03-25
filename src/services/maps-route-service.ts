@@ -35,6 +35,7 @@ interface GoogleMapsDirectionsResult {
 
 interface GoogleMapsNamespace {
   maps: {
+    importLibrary: (libraryName: string) => Promise<Record<string, unknown>>;
     Map: new (element: HTMLElement, options: Record<string, unknown>) => unknown;
     DirectionsService: new () => {
       route: (
@@ -53,11 +54,26 @@ interface GoogleMapsNamespace {
 declare global {
   interface Window {
     google?: GoogleMapsNamespace;
+    __viajemosGoogleMapsInit?: () => void;
   }
 }
 
 const GOOGLE_MAPS_SCRIPT_ID = "viajemos-google-maps";
-let googleMapsPromise: Promise<GoogleMapsNamespace> | null = null;
+const GOOGLE_MAPS_CALLBACK = "__viajemosGoogleMapsInit";
+
+interface LoadedGoogleMaps {
+  google: GoogleMapsNamespace;
+  mapsLibrary: {
+    Map: GoogleMapsNamespace["maps"]["Map"];
+  };
+  routesLibrary: {
+    DirectionsService: GoogleMapsNamespace["maps"]["DirectionsService"];
+    DirectionsRenderer: GoogleMapsNamespace["maps"]["DirectionsRenderer"];
+    TravelMode: GoogleMapsNamespace["maps"]["TravelMode"];
+  };
+}
+
+let googleMapsPromise: Promise<LoadedGoogleMaps> | null = null;
 
 function getTravelMode(travelMode: RouteTravelMode): GoogleMapsTravelMode {
   if (travelMode === "walking") {
@@ -76,8 +92,8 @@ function getRoutableItems(items: ItineraryItem[]) {
 }
 
 async function loadGoogleMaps() {
-  if (window.google?.maps) {
-    return window.google;
+  if (window.google?.maps?.importLibrary) {
+    return resolveLibraries(window.google);
   }
 
   if (!env.googleMapsApiKey) {
@@ -92,34 +108,46 @@ async function loadGoogleMaps() {
     const existingScript = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
 
     if (existingScript) {
-      existingScript.addEventListener("load", () => {
-        if (window.google?.maps) {
+      if (window.google?.maps?.importLibrary) {
+        resolve(window.google);
+        return;
+      }
+
+      const handleReady = () => {
+        if (window.google?.maps?.importLibrary) {
           resolve(window.google);
           return;
         }
 
         reject(new Error("Google Maps no se ha cargado correctamente."));
-      });
+      };
+      window[GOOGLE_MAPS_CALLBACK] = handleReady;
       existingScript.addEventListener("error", () => reject(new Error("No se pudo cargar Google Maps.")));
       return;
     }
 
-    const script = document.createElement("script");
-    script.id = GOOGLE_MAPS_SCRIPT_ID;
-    script.async = true;
-    script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(env.googleMapsApiKey)}&loading=async`;
-    script.onload = () => {
-      if (window.google?.maps) {
+    window[GOOGLE_MAPS_CALLBACK] = () => {
+      if (window.google?.maps?.importLibrary) {
         resolve(window.google);
         return;
       }
 
       reject(new Error("Google Maps no se ha inicializado."));
     };
+
+    const script = document.createElement("script");
+    script.id = GOOGLE_MAPS_SCRIPT_ID;
+    script.async = true;
+    script.defer = true;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(env.googleMapsApiKey)}&loading=async&callback=${GOOGLE_MAPS_CALLBACK}&v=weekly`;
     script.onerror = () => reject(new Error("No se pudo descargar Google Maps."));
     document.head.appendChild(script);
-  }).catch((error) => {
+  })
+    .then((google) => resolveLibraries(google))
+    .finally(() => {
+      delete window[GOOGLE_MAPS_CALLBACK];
+    })
+    .catch((error) => {
     googleMapsPromise = null;
     throw error;
   });
@@ -127,9 +155,28 @@ async function loadGoogleMaps() {
   return googleMapsPromise;
 }
 
-function requestDirections(google: GoogleMapsNamespace, request: GoogleMapsDirectionsRequest) {
+async function resolveLibraries(google: GoogleMapsNamespace): Promise<LoadedGoogleMaps> {
+  if (!google.maps.importLibrary) {
+    throw new Error("Google Maps no ha expuesto importLibrary correctamente.");
+  }
+
+  const mapsLibrary = (await google.maps.importLibrary("maps")) as LoadedGoogleMaps["mapsLibrary"];
+  const routesLibrary = (await google.maps.importLibrary("routes")) as LoadedGoogleMaps["routesLibrary"];
+
+  if (!mapsLibrary.Map || !routesLibrary.DirectionsService || !routesLibrary.DirectionsRenderer) {
+    throw new Error("Google Maps no ha cargado las librerias necesarias para dibujar la ruta.");
+  }
+
+  return {
+    google,
+    mapsLibrary,
+    routesLibrary
+  };
+}
+
+function requestDirections(loadedGoogleMaps: LoadedGoogleMaps, request: GoogleMapsDirectionsRequest) {
   return new Promise<GoogleMapsDirectionsResult>((resolve, reject) => {
-    const service = new google.maps.DirectionsService();
+    const service = new loadedGoogleMaps.routesLibrary.DirectionsService();
     service.route(request, (result, status) => {
       if (!result || status !== "OK") {
         reject(new Error("Google Maps no ha podido calcular esta ruta. Revisa las direcciones del dia."));
@@ -184,14 +231,16 @@ export const mapsRouteService = {
     items: ItineraryItem[];
     travelMode?: RouteTravelMode;
   }): Promise<RouteSnapshotDraft> {
-    const google = await loadGoogleMaps();
+    const loadedGoogleMaps = await loadGoogleMaps();
     const routeItems = getRoutableItems(items);
 
     if (routeItems.length < 2) {
       throw new Error("Necesitas al menos dos paradas con direccion para calcular la ruta.");
     }
 
-    const map = new google.maps.Map(container, {
+    container.replaceChildren();
+
+    const map = new loadedGoogleMaps.mapsLibrary.Map(container, {
       disableDefaultUI: false,
       mapTypeControl: false,
       streetViewControl: false,
@@ -199,7 +248,7 @@ export const mapsRouteService = {
       zoomControl: true
     });
 
-    const renderer = new google.maps.DirectionsRenderer({
+    const renderer = new loadedGoogleMaps.routesLibrary.DirectionsRenderer({
       map,
       suppressMarkers: false,
       preserveViewport: false,
@@ -218,10 +267,10 @@ export const mapsRouteService = {
         stopover: true
       })),
       optimizeWaypoints: false,
-      travelMode: google.maps.TravelMode[getTravelMode(travelMode)]
+      travelMode: loadedGoogleMaps.routesLibrary.TravelMode[getTravelMode(travelMode)]
     };
 
-    const result = await requestDirections(google, request);
+    const result = await requestDirections(loadedGoogleMaps, request);
     renderer.setDirections(result);
 
     const legs = result.routes?.[0]?.legs ?? [];
