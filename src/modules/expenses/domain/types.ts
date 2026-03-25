@@ -14,6 +14,7 @@ export interface ExpenseReceipt {
   fileName: string;
   mimeType?: string;
   fileSize?: number;
+  fileHash?: string;
   uploadedBy: string;
   uploadedAt?: string;
   fileUrl?: string;

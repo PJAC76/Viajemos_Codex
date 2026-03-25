@@ -26,6 +26,13 @@ function sanitizeFileName(fileName: string) {
   return fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
 }
 
+async function computeFileHash(file: File) {
+  const fileBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
+  const hashBytes = Array.from(new Uint8Array(hashBuffer));
+  return hashBytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 function toExpenseActionError(message: string | undefined, fallback: string) {
   if (!message) {
     return fallback;
@@ -68,6 +75,7 @@ function normalizeExpenseReceipt(row: Record<string, unknown>): ExpenseReceipt {
     fileName: typeof row.file_name === "string" ? row.file_name : "ticket",
     mimeType: typeof row.mime_type === "string" ? row.mime_type : undefined,
     fileSize: toNumber(row.file_size),
+    fileHash: typeof row.file_hash === "string" ? row.file_hash : undefined,
     uploadedBy: typeof row.uploaded_by === "string" ? row.uploaded_by : "",
     uploadedAt: typeof row.created_at === "string" ? row.created_at : undefined,
     fileUrl: typeof row.file_url === "string" ? row.file_url : undefined
@@ -151,6 +159,8 @@ async function upsertExpenseReceipt(tripId: string, expenseId: string, userId: s
     return;
   }
 
+  const fileHash = await computeFileHash(receiptFile);
+
   const existingReceiptResult = await insforge.database
     .from("expense_receipts")
     .select("*")
@@ -181,6 +191,7 @@ async function upsertExpenseReceipt(tripId: string, expenseId: string, userId: s
     file_name: receiptFile.name,
     mime_type: receiptFile.type || uploadedFile.mimeType || null,
     file_size: typeof uploadedFile.size === "number" ? uploadedFile.size : receiptFile.size,
+    file_hash: fileHash,
     file_url: uploadedFile.publicUrl || null,
     uploaded_by: userId
   };

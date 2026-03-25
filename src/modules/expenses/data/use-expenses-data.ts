@@ -3,6 +3,13 @@ import { useSession } from "../../../app/providers/session-provider";
 import type { Expense, ExpenseCategory, ExpenseUpsertInput } from "../domain/types";
 import { expensesQueries } from "./expenses-queries";
 
+async function computeFileHash(file: File) {
+  const fileBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
+  const hashBytes = Array.from(new Uint8Array(hashBuffer));
+  return hashBytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function useExpenses(tripId?: string, userNames: Record<string, string> = {}) {
   const { user } = useSession();
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -38,9 +45,38 @@ export function useExpenses(tripId?: string, userNames: Record<string, string> =
     void reload();
   }, [tripId, JSON.stringify(userNames)]);
 
+  async function assertTicketIsNotDuplicated(receiptFile: File, currentExpenseId?: string) {
+    const nextFileHash = await computeFileHash(receiptFile);
+    const duplicateExpense = expenses.find((expense) => {
+      if (!expense.receipt) {
+        return false;
+      }
+
+      if (currentExpenseId && expense.id === currentExpenseId) {
+        return false;
+      }
+
+      if (expense.receipt.fileHash) {
+        return expense.receipt.fileHash === nextFileHash;
+      }
+
+      return expense.receipt.fileName === receiptFile.name && expense.receipt.fileSize === receiptFile.size;
+    });
+
+    if (!duplicateExpense) {
+      return;
+    }
+
+    throw new Error(`Este ticket ya esta asociado al gasto "${duplicateExpense.concept}". Sube una imagen distinta o reutiliza ese gasto.`);
+  }
+
   async function createExpense(input: ExpenseUpsertInput, receiptFile?: File | null) {
     if (!tripId || !user) {
       throw new Error("Necesitas una sesion activa dentro del viaje para registrar un gasto.");
+    }
+
+    if (receiptFile) {
+      await assertTicketIsNotDuplicated(receiptFile);
     }
 
     const expenseId = await expensesQueries.createExpense(tripId, user.id, input, receiptFile);
@@ -51,6 +87,10 @@ export function useExpenses(tripId?: string, userNames: Record<string, string> =
   async function updateExpense(expenseId: string, input: ExpenseUpsertInput, receiptFile?: File | null) {
     if (!tripId || !user) {
       throw new Error("Necesitas una sesion activa dentro del viaje para editar un gasto.");
+    }
+
+    if (receiptFile) {
+      await assertTicketIsNotDuplicated(receiptFile, expenseId);
     }
 
     await expensesQueries.updateExpense(expenseId, tripId, user.id, input, receiptFile);
