@@ -27,6 +27,7 @@ interface GoogleMapsRouteLeg {
 
 interface GoogleMapsDirectionsRoute {
   legs?: GoogleMapsRouteLeg[];
+  waypoint_order?: number[];
 }
 
 interface GoogleMapsDirectionsResult {
@@ -266,14 +267,24 @@ export const mapsRouteService = {
         location: item.address,
         stopover: true
       })),
-      optimizeWaypoints: false,
+      optimizeWaypoints: routeItems.length > 2,
       travelMode: loadedGoogleMaps.routesLibrary.TravelMode[getTravelMode(travelMode)]
     };
 
     const result = await requestDirections(loadedGoogleMaps, request);
     renderer.setDirections(result);
 
-    const legs = result.routes?.[0]?.legs ?? [];
+    const activeRoute = result.routes?.[0] ?? null;
+    const legs = activeRoute?.legs ?? [];
+    const waypointOrder = activeRoute?.waypoint_order ?? [];
+    const orderedRouteItems =
+      routeItems.length <= 2
+        ? routeItems
+        : [
+            routeItems[0],
+            ...waypointOrder.map((index) => routeItems[index + 1]).filter(Boolean),
+            routeItems[routeItems.length - 1]
+          ];
     const totalDistanceKm = Number(
       legs.reduce((total, leg) => total + ((leg.distance?.value ?? 0) / 1000), 0).toFixed(1)
     );
@@ -285,9 +296,10 @@ export const mapsRouteService = {
       totalDistanceKm,
       totalDurationMinutes,
       travelMode,
+      orderedItemIds: orderedRouteItems.map((item) => item.id),
       segments: legs.map((leg, index) => ({
-        from: routeItems[index]?.title ?? routeItems[index]?.address ?? "Origen",
-        to: routeItems[index + 1]?.title ?? routeItems[index + 1]?.address ?? "Destino",
+        from: orderedRouteItems[index]?.title ?? orderedRouteItems[index]?.address ?? "Origen",
+        to: orderedRouteItems[index + 1]?.title ?? orderedRouteItems[index + 1]?.address ?? "Destino",
         distanceKm: Number(((leg.distance?.value ?? 0) / 1000).toFixed(1)),
         durationMinutes: Math.round((leg.duration?.value ?? 0) / 60)
       }))

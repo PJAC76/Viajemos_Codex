@@ -75,7 +75,7 @@ export function ItineraryScreen() {
   const { trip, loading: tripLoading } = useTripOverview(tripId);
   const { isAdmin } = useTripPermission(tripId);
   const { places } = usePlacesCatalog(tripId);
-  const { days, itemsByDay, loading, error, createItem, updateItem, deleteItem, moveItem } = useItinerary(
+  const { days, itemsByDay, loading, error, createItem, updateItem, deleteItem, moveItem, saveOptimizedOrder } = useItinerary(
     tripId,
     trip?.startDate,
     trip?.endDate
@@ -241,6 +241,11 @@ export function ItineraryScreen() {
     try {
       setSavingRoute(true);
       setActionError(null);
+
+      if (previewRoute.orderedItemIds?.length) {
+        await saveOptimizedOrder(activeDay.id, previewRoute.orderedItemIds);
+      }
+
       await saveSnapshot({
         ...previewRoute,
         tripId,

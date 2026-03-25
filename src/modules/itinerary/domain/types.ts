@@ -52,6 +52,7 @@ export interface RouteSnapshotDraft {
   totalDurationMinutes: number;
   travelMode: RouteTravelMode;
   segments: RouteSegment[];
+  orderedItemIds?: string[];
 }
 
 export interface RouteSnapshot extends RouteSnapshotDraft {

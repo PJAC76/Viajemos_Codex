@@ -125,6 +125,45 @@ export function useItinerary(tripId?: string, startDate?: string, endDate?: stri
     );
   }
 
+  async function saveOptimizedOrder(dayId: string, orderedItemIds: string[]) {
+    const dayItems = items.filter((item) => item.dayId === dayId);
+    const orderedItems = orderedItemIds
+      .map((itemId, index) => {
+        const item = dayItems.find((entry) => entry.id === itemId);
+
+        if (!item) {
+          return null;
+        }
+
+        return {
+          ...item,
+          order: index + 1
+        };
+      })
+      .filter(Boolean) as ItineraryItem[];
+
+    if (orderedItems.length === 0) {
+      return;
+    }
+
+    await itineraryQueries.saveItemOrder(dayId, orderedItems);
+
+    setItems((currentItems) =>
+      currentItems
+        .map((item) => {
+          const reorderedItem = orderedItems.find((candidate) => candidate.id === item.id);
+          return reorderedItem ?? item;
+        })
+        .sort((left, right) => {
+          if (left.dayId === right.dayId) {
+            return left.order - right.order;
+          }
+
+          return left.dayId.localeCompare(right.dayId);
+        })
+    );
+  }
+
   const itemsByDay = useMemo(() => {
     const map = new Map<string, ItineraryItem[]>();
 
@@ -145,6 +184,7 @@ export function useItinerary(tripId?: string, startDate?: string, endDate?: stri
     createItem,
     updateItem,
     deleteItem,
-    moveItem
+    moveItem,
+    saveOptimizedOrder
   };
 }
