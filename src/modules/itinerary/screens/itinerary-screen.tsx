@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { DayRoutePreview } from "../../../components/maps/day-route-preview";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
@@ -283,22 +284,26 @@ export function ItineraryScreen() {
             </div>
           ) : null}
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Paradas del dia</p>
-            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">{activeItems.length}</p>
-          </div>
-          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Distancia estimada</p>
-            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-              {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDistanceKm.toFixed(1)} km` : "Pendiente"}
-            </p>
-          </div>
-          <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tiempo estimado</p>
-            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-              {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDurationMinutes} min` : "Pendiente"}
-            </p>
+        <div className="mt-4 space-y-4">
+          <DayRoutePreview
+            items={activeItems}
+            heightClassName="h-56"
+            emptyTitle="Aun no hay ruta del dia"
+            emptyDescription="Anade al menos dos paradas con direccion valida para ver el mapa directamente desde el itinerario."
+          />
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Distancia guardada</p>
+              <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+                {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDistanceKm.toFixed(1)} km` : "Pendiente"}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tiempo guardado</p>
+              <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+                {routeLoading ? "Calculando..." : routeSnapshot ? `${routeSnapshot.totalDurationMinutes} min` : "Pendiente"}
+              </p>
+            </div>
           </div>
         </div>
       </Card>

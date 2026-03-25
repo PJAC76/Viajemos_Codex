@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { itineraryItems } from "../../../mocks/db";
+import { DayRoutePreview } from "../../../components/maps/day-route-preview";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { MemberStack } from "../../../components/trips/member-stack";
@@ -13,7 +13,9 @@ import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { formatCurrency } from "../../../lib/utils";
+import { mapsRouteService } from "../../../services/maps-route-service";
 import { useExpenses } from "../../expenses/data/use-expenses-data";
+import { useItinerary } from "../../itinerary/data/use-itinerary-data";
 import { useTripOverview, useTripPermission } from "../data/use-trips-data";
 
 export function DashboardScreen() {
@@ -30,12 +32,35 @@ export function DashboardScreen() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
-  const upcoming = itineraryItems.filter((item) => item.tripId === tripId).slice(0, 3);
   const memberNames = useMemo(
     () => Object.fromEntries(members.map((member) => [member.userId, member.displayName])),
     [members]
   );
   const { totalAmount, expenses, loading: expensesLoading } = useExpenses(tripId, memberNames);
+  const { days, itemsByDay, loading: itineraryLoading } = useItinerary(tripId, trip?.startDate, trip?.endDate);
+
+  const upcoming = useMemo(
+    () =>
+      days
+        .flatMap((day) => itemsByDay.get(day.id) ?? [])
+        .sort((left, right) => {
+          if (left.dayId === right.dayId) {
+            return left.order - right.order;
+          }
+
+          return left.startTime.localeCompare(right.startTime);
+        })
+        .slice(0, 3),
+    [days, itemsByDay]
+  );
+
+  const previewDay = useMemo(
+    () => days.find((day) => mapsRouteService.canCalculateRoute(itemsByDay.get(day.id) ?? [])) ?? days[0] ?? null,
+    [days, itemsByDay]
+  );
+
+  const previewItems = useMemo(() => (previewDay ? itemsByDay.get(previewDay.id) ?? [] : []), [itemsByDay, previewDay]);
+  const previewMapsUrl = useMemo(() => mapsRouteService.buildGoogleMapsDirectionsUrl(previewItems, "driving"), [previewItems]);
 
   useEffect(() => {
     if (!trip) {
@@ -105,7 +130,7 @@ export function DashboardScreen() {
 
       {editing ? (
         <Card className="p-6">
-          <SectionHeader title="Editar viaje" description="Esta ficha ya guarda cambios en la tabla real trips de InsForge." />
+          <SectionHeader title="Editar viaje" description="Esta ficha guarda cambios reales en el viaje y actualiza el itinerario asociado." />
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Titulo</p>
@@ -162,11 +187,11 @@ export function DashboardScreen() {
         <section className="space-y-5">
           <SectionHeader
             title="Proximas paradas"
-            description="La estructura ya esta conectada a trips reales; el itinerario seguira usando mocks hasta el modulo M6."
+            description="Vista real del itinerario del viaje, ordenada por dia y hora."
             action={isAdmin ? <Button onClick={() => setEditing((current) => !current)}>{editing ? "Cerrar" : "Editar viaje"}</Button> : null}
           />
           {upcoming.length === 0 ? (
-            <EmptyState title="Aun no hay paradas" description="Cuando conectemos el modulo de itinerario, aqui veras las proximas actividades del viaje." />
+            <EmptyState title="Aun no hay paradas" description="Anade eventos al itinerario para ver aqui las proximas actividades del viaje." />
           ) : (
             <div className="space-y-4">
               {upcoming.map((item) => (
@@ -194,15 +219,36 @@ export function DashboardScreen() {
               <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{members.length} miembros</p>
             </div>
           </Card>
-          <Card className="overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-primary/20 via-sky-100 to-slate-100 dark:from-primary/10 dark:via-slate-900 dark:to-slate-800" />
-            <div className="p-5">
-              <SectionHeader title="Mapa del viaje" description="Contenedor listo para integrar Google Maps." />
-              <div className="mt-4 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                <span>Ruta diaria optimizada</span>
-                <span>{upcoming.length > 0 ? "18.2 km · 72 min" : "Pendiente de calcular"}</span>
+          <Card className="overflow-hidden p-5">
+            <SectionHeader title="Mapa del viaje" description="Vista previa real de la ruta del dia con mejor contexto del resumen." />
+            {itineraryLoading ? (
+              <div className="mt-4 flex min-h-52 items-center justify-center text-sm text-slate-500">Cargando ruta del viaje...</div>
+            ) : previewDay ? (
+              <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between gap-3 text-sm text-slate-500 dark:text-slate-400">
+                  <span>{`Vista previa de ${previewDay.label}`}</span>
+                  <Button variant="secondary" onClick={() => navigate(`/trips/${trip.id}/map`)}>
+                    Abrir mapa
+                  </Button>
+                </div>
+                <DayRoutePreview
+                  items={previewItems}
+                  heightClassName="h-56"
+                  emptyTitle="Aun no hay ruta calculable"
+                  emptyDescription="Anade al menos dos paradas con direccion valida en el itinerario para ver el mapa aqui."
+                />
+                {previewMapsUrl ? (
+                  <a href={previewMapsUrl} target="_blank" rel="noreferrer" className="inline-flex text-sm font-semibold text-primary">
+                    Abrir esta ruta en Google Maps
+                  </a>
+                ) : null}
               </div>
-            </div>
+            ) : (
+              <EmptyState
+                title="Aun no hay dias en el itinerario"
+                description="Cuando el viaje tenga dias y paradas, aqui veras la ruta activa en el resumen."
+              />
+            )}
           </Card>
         </section>
       </div>
