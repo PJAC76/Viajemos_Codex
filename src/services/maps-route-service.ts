@@ -89,7 +89,13 @@ function getTravelMode(travelMode: RouteTravelMode): GoogleMapsTravelMode {
 }
 
 function getRoutableItems(items: ItineraryItem[]) {
-  return items.filter((item) => item.address.trim().length > 0).sort((left, right) => left.order - right.order);
+  return items
+    .filter((item) => getRouteLocation(item).length > 0)
+    .sort((left, right) => left.order - right.order);
+}
+
+function getRouteLocation(item: ItineraryItem) {
+  return item.address.trim() || item.title.trim();
 }
 
 async function loadGoogleMaps() {
@@ -202,12 +208,12 @@ export const mapsRouteService = {
     }
 
     if (routeItems.length === 1) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(routeItems[0].address)}`;
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getRouteLocation(routeItems[0]))}`;
     }
 
-    const origin = routeItems[0].address;
-    const destination = routeItems[routeItems.length - 1].address;
-    const waypoints = routeItems.slice(1, -1).map((item) => item.address).filter(Boolean);
+    const origin = getRouteLocation(routeItems[0]);
+    const destination = getRouteLocation(routeItems[routeItems.length - 1]);
+    const waypoints = routeItems.slice(1, -1).map((item) => getRouteLocation(item)).filter(Boolean);
     const normalizedTravelMode = travelMode === "walking" ? "walking" : travelMode === "transit" ? "transit" : "driving";
     const params = new URLSearchParams({
       api: "1",
@@ -261,10 +267,10 @@ export const mapsRouteService = {
     });
 
     const request: GoogleMapsDirectionsRequest = {
-      origin: routeItems[0].address,
-      destination: routeItems[routeItems.length - 1].address,
+      origin: getRouteLocation(routeItems[0]),
+      destination: getRouteLocation(routeItems[routeItems.length - 1]),
       waypoints: routeItems.slice(1, -1).map((item) => ({
-        location: item.address,
+        location: getRouteLocation(item),
         stopover: true
       })),
       optimizeWaypoints: routeItems.length > 2,
