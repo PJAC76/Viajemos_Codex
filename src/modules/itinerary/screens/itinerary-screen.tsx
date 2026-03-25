@@ -471,13 +471,38 @@ export function ItineraryScreen() {
           )}
         </Card>
 
-        <Card className="overflow-hidden">
-          <div className="aspect-[4/3] bg-gradient-to-br from-sky-100 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-800" />
-          <div className="space-y-4 p-6">
+        <Card className="p-6">
+          <div className="space-y-4">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Resumen del dia</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {activeDay ? `${activeItems.length} eventos en ${activeDay.label}.` : "Selecciona un dia para ver su resumen."}
             </p>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+              <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Ruta guardada</p>
+                <p className="mt-2 text-xl font-extrabold text-slate-900 dark:text-white">
+                  {routeSnapshot ? `${routeSnapshot.totalDistanceKm.toFixed(1)} km` : "Pendiente"}
+                </p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {routeSnapshot ? `${routeSnapshot.totalDurationMinutes} min totales` : "Calcula la ruta para guardar el resumen"}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Acceso rapido</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {tripId ? (
+                    <Link to={`/trips/${tripId}/map`}>
+                      <Button variant="secondary">Abrir mapa</Button>
+                    </Link>
+                  ) : null}
+                  {externalMapsUrl ? (
+                    <a href={externalMapsUrl} target="_blank" rel="noreferrer">
+                      <Button variant="secondary">Google Maps</Button>
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            </div>
             {activeItems.length > 0 ? (
               <div className="space-y-3">
                 {activeItems.map((item) => (
