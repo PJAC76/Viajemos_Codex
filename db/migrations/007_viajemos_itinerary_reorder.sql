@@ -24,7 +24,9 @@ begin
   end if;
 
   update public.itinerary_items
-  set order_index = -order_index
+  set
+    order_index = order_index + 1000,
+    updated_at = now()
   where day_id = target_day_id;
 
   foreach item_id in array ordered_item_ids loop
