@@ -93,7 +93,12 @@ export function AcceptInvitationScreen() {
     <AuthLayout>
       <Card className="w-full max-w-2xl overflow-hidden">
         <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-900">
-          <TripCoverImage src={invitation.coverImage} alt={invitation.tripTitle} className="h-full w-full object-cover" />
+                <TripCoverImage
+                  src={invitation.coverImage}
+                  alt={invitation.tripTitle}
+                  searchQuery={`${invitation.tripTitle}, ${invitation.destination}`}
+                  className="h-full w-full object-cover"
+                />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6 text-white">
             <div className="flex items-center gap-2">

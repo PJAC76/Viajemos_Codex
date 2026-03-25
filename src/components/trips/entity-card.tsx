@@ -1,3 +1,4 @@
+import { GooglePlaceImage } from "../maps/google-place-image";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -6,6 +7,7 @@ export function EntityCard({
   image,
   title,
   subtitle,
+  searchQuery,
   meta,
   status,
   actionLabel,
@@ -14,6 +16,7 @@ export function EntityCard({
   image: string;
   title: string;
   subtitle: string;
+  searchQuery?: string;
   meta: string[];
   status?: string;
   actionLabel?: string;
@@ -22,7 +25,7 @@ export function EntityCard({
   return (
     <Card className="overflow-hidden">
       <div className="relative aspect-[16/10] w-full bg-slate-200">
-        <img src={image} alt={title} className="h-full w-full object-cover" />
+        <GooglePlaceImage src={image} alt={title} searchQuery={searchQuery ?? [title, subtitle].filter(Boolean).join(", ")} className="h-full w-full" />
         {status ? <Badge className="absolute left-3 top-3 bg-white/90 text-primary">{status}</Badge> : null}
       </div>
       <div className="p-4">

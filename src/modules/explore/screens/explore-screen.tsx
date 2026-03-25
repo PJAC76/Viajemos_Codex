@@ -134,7 +134,7 @@ export function ExploreScreen() {
               <Link key={trip.id} to={`/trips/${trip.id}/summary`}>
                 <Card className="h-full overflow-hidden border-white/60 bg-white/80 p-0 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
                   <div className="aspect-[16/10] bg-slate-200">
-                    <TripCoverImage src={trip.coverImage} alt={trip.title} className="h-full w-full object-cover" />
+                    <TripCoverImage src={trip.coverImage} alt={trip.title} searchQuery={`${trip.title}, ${trip.destination}`} className="h-full w-full object-cover" />
                   </div>
                   <div className="space-y-2 p-4">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{trip.title}</p>

@@ -133,7 +133,7 @@ export function TripsScreen() {
       <div className="grid gap-6 lg:grid-cols-2">
         {trips.map((trip) => (
           <Card key={trip.id} className="overflow-hidden">
-            <TripCoverImage src={trip.coverImage} alt={trip.title} className="h-56 w-full object-cover" />
+            <TripCoverImage src={trip.coverImage} alt={trip.title} searchQuery={`${trip.title}, ${trip.destination}`} className="h-56 w-full object-cover" />
             <div className="p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>

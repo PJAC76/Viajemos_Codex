@@ -330,13 +330,13 @@ export const expensesQueries = {
 
     const { data, error } = await insforge.database.rpc("update_expense_with_splits", {
       target_expense_id: expenseId,
-      expense_concept: input.concept,
-      expense_category_id: input.categoryId,
-      expense_amount: input.amount,
-      expense_paid_by: input.paidBy,
-      expense_date: input.date,
-      expense_description: input.description ?? null,
-      split_user_ids: input.splitBetween
+      next_expense_concept: input.concept,
+      next_expense_category_id: input.categoryId,
+      next_expense_amount: input.amount,
+      next_expense_paid_by: input.paidBy,
+      next_expense_date: input.date,
+      next_expense_description: input.description ?? null,
+      next_split_user_ids: input.splitBetween
     });
 
     if (error) {

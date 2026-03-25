@@ -156,7 +156,12 @@ export function DashboardScreen() {
                 Usa una URL directa de imagen. Si pegas la URL de una web, se mostrara una portada por defecto.
               </p>
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
-                <TripCoverImage src={coverImage} alt={title || "Vista previa de portada"} className="h-44 w-full object-cover" />
+                <TripCoverImage
+                  src={coverImage}
+                  alt={title || "Vista previa de portada"}
+                  searchQuery={[title, destination].filter(Boolean).join(", ")}
+                  className="h-44 w-full object-cover"
+                />
               </div>
             </div>
             <div className="space-y-2 md:col-span-2">

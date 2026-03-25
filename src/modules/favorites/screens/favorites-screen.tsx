@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { GooglePlaceImage } from "../../../components/maps/google-place-image";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
@@ -34,7 +35,12 @@ export function FavoritesScreen() {
           {favorites.map((place) => (
             <Card key={place.id} className="overflow-hidden">
               <div className="relative aspect-[16/10] w-full bg-slate-200">
-                {place.image ? <img src={place.image} alt={place.name} className="h-full w-full object-cover" /> : null}
+                <GooglePlaceImage
+                  src={place.image}
+                  alt={place.name}
+                  searchQuery={[place.name, place.address].filter(Boolean).join(", ")}
+                  className="h-full w-full"
+                />
                 <div className="absolute left-3 top-3 flex flex-wrap gap-2">
                   <Badge className="bg-white/90 text-primary">
                     {place.type === "hotel" ? "Hotel" : place.type === "restaurant" ? "Restaurante" : "Lugar"}
