@@ -58,8 +58,12 @@ export function useDocuments(tripId?: string, userNames: Record<string, string> 
     setDocuments((currentDocuments) => currentDocuments.filter((document) => document.id !== documentId));
   }
 
-  async function openDocument(document: TripDocument) {
-    await documentsQueries.openDocument(document);
+  async function getDocumentPreview(document: TripDocument) {
+    return documentsQueries.getDocumentPreview(document);
+  }
+
+  async function downloadDocument(document: TripDocument) {
+    await documentsQueries.downloadDocument(document);
   }
 
   const groupedCounts = useMemo(
@@ -79,6 +83,7 @@ export function useDocuments(tripId?: string, userNames: Record<string, string> 
     reload,
     createDocument,
     deleteDocument,
-    openDocument
+    getDocumentPreview,
+    downloadDocument
   };
 }

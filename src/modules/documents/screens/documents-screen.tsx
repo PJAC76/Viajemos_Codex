@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSession } from "../../../app/providers/session-provider";
+import { FilePreviewDialog } from "../../../components/files/file-preview-dialog";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
 import { SectionHeader } from "../../../components/trips/section-header";
@@ -64,7 +65,7 @@ export function DocumentsScreen() {
     () => Object.fromEntries(members.map((member) => [member.userId, member.displayName])),
     [members]
   );
-  const { documents, groupedCounts, loading, error, reload, createDocument, deleteDocument, openDocument } = useDocuments(tripId, userNames);
+  const { documents, groupedCounts, loading, error, reload, createDocument, deleteDocument, getDocumentPreview, downloadDocument } = useDocuments(tripId, userNames);
   const { expenses, loading: expensesLoading } = useExpenses(tripId, userNames);
   const { reservations, loading: reservationsLoading } = useReservations(tripId);
 
@@ -75,6 +76,13 @@ export function DocumentsScreen() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "pdf" | "image" | "file">("all");
   const [busyDocumentId, setBusyDocumentId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{
+    documentId: string;
+    title: string;
+    fileName: string;
+    mimeType?: string;
+    objectUrl: string;
+  } | null>(null);
   const [form, setForm] = useState<TripDocumentUpsertInput>({
     title: "",
     description: "",
@@ -146,7 +154,7 @@ export function DocumentsScreen() {
     }
   }
 
-  async function handleOpenDocument(documentId: string) {
+  async function handlePreviewDocument(documentId: string) {
     const document = documents.find((item) => item.id === documentId);
 
     if (!document) {
@@ -156,12 +164,50 @@ export function DocumentsScreen() {
     try {
       setBusyDocumentId(documentId);
       setActionError(null);
-      await openDocument(document);
+      const nextPreview = await getDocumentPreview(document);
+
+      if (!nextPreview?.objectUrl) {
+        throw new Error("No se pudo cargar una vista previa de este documento.");
+      }
+
+      setPreview({
+        documentId,
+        title: document.title,
+        fileName: document.fileName,
+        mimeType: document.mimeType ?? nextPreview.mimeType,
+        objectUrl: nextPreview.objectUrl
+      });
     } catch (documentError) {
       setActionError(documentError instanceof Error ? documentError.message : "No se pudo abrir el documento seleccionado.");
     } finally {
       setBusyDocumentId(null);
     }
+  }
+
+  async function handleDownloadDocument(documentId: string) {
+    const document = documents.find((item) => item.id === documentId);
+
+    if (!document) {
+      return;
+    }
+
+    try {
+      setBusyDocumentId(documentId);
+      setActionError(null);
+      await downloadDocument(document);
+    } catch (documentError) {
+      setActionError(documentError instanceof Error ? documentError.message : "No se pudo descargar el documento seleccionado.");
+    } finally {
+      setBusyDocumentId(null);
+    }
+  }
+
+  function closePreview() {
+    if (preview?.objectUrl) {
+      URL.revokeObjectURL(preview.objectUrl);
+    }
+
+    setPreview(null);
   }
 
   async function handleDeleteDocument(documentId: string, storageKey: string) {
@@ -186,6 +232,19 @@ export function DocumentsScreen() {
 
   return (
     <div className="space-y-8">
+      <FilePreviewDialog
+        open={Boolean(preview)}
+        title={preview?.title ?? "Vista previa"}
+        fileName={preview?.fileName ?? ""}
+        mimeType={preview?.mimeType}
+        objectUrl={preview?.objectUrl}
+        onClose={closePreview}
+        onDownload={() => {
+          if (preview) {
+            void handleDownloadDocument(preview.documentId);
+          }
+        }}
+      />
       <SectionHeader
         title="Documentos"
         description="Storage privado por viaje para seguros, billetes, adjuntos y documentos de apoyo del grupo."
@@ -367,10 +426,17 @@ export function DocumentsScreen() {
                     <div className="flex flex-wrap gap-2">
                       <Button
                         variant="secondary"
-                        onClick={() => void handleOpenDocument(document.id)}
+                        onClick={() => void handlePreviewDocument(document.id)}
                         disabled={busyDocumentId === document.id}
                       >
-                        {busyDocumentId === document.id ? "Abriendo..." : "Abrir"}
+                        {busyDocumentId === document.id ? "Abriendo..." : "Visualizar"}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => void handleDownloadDocument(document.id)}
+                        disabled={busyDocumentId === document.id}
+                      >
+                        {busyDocumentId === document.id ? "Descargando..." : "Descargar"}
                       </Button>
                       {canDelete ? (
                         <Button

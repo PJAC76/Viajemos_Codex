@@ -206,20 +206,11 @@ export const documentsQueries = {
     }
   },
 
-  async openDocument(document: TripDocument) {
-    const blob = await storageService.downloadTripFile(document.storageKey);
+  async getDocumentPreview(document: TripDocument) {
+    return storageService.getTripFilePreview(document.storageKey);
+  },
 
-    if (!blob) {
-      if (document.fileUrl) {
-        window.open(document.fileUrl, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      throw new Error("No hemos podido abrir el documento seleccionado.");
-    }
-
-    const objectUrl = URL.createObjectURL(blob);
-    window.open(objectUrl, "_blank", "noopener,noreferrer");
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  async downloadDocument(document: TripDocument) {
+    await storageService.downloadTripFileAs(document.storageKey, document.fileName, document.fileUrl);
   }
 };

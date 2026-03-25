@@ -64,5 +64,49 @@ export const storageService = {
     }
 
     return data ?? null;
+  },
+
+  async getTripFilePreview(path?: string) {
+    const blob = await this.downloadTripFile(path);
+
+    if (!blob) {
+      return null;
+    }
+
+    return {
+      blob,
+      objectUrl: URL.createObjectURL(blob),
+      mimeType: blob.type || undefined
+    };
+  },
+
+  releaseObjectUrl(objectUrl?: string | null) {
+    if (!objectUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(objectUrl);
+  },
+
+  async downloadTripFileAs(path: string | undefined, fileName: string, fallbackUrl?: string) {
+    const preview = await this.getTripFilePreview(path);
+
+    if (!preview) {
+      if (fallbackUrl) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      throw new Error("No se pudo descargar el archivo solicitado.");
+    }
+
+    const link = document.createElement("a");
+    link.href = preview.objectUrl;
+    link.download = fileName;
+    link.click();
+
+    window.setTimeout(() => {
+      this.releaseObjectUrl(preview.objectUrl);
+    }, 1_000);
   }
 };

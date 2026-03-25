@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/states/empty-state";
 import { ErrorState } from "../../../components/states/error-state";
+import { FilePreviewDialog } from "../../../components/files/file-preview-dialog";
 import { ExpenseTable } from "../../../components/trips/expense-table";
 import { SectionHeader } from "../../../components/trips/section-header";
 import { StatCard } from "../../../components/trips/stat-card";
@@ -11,6 +12,7 @@ import { Card } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { formatCurrency } from "../../../lib/utils";
 import { useSession } from "../../../app/providers/session-provider";
+import { storageService } from "../../../services/storage-service";
 import { useTripMembers, useTripOverview, useTripPermission } from "../../trips/data/use-trips-data";
 import { useExpenses } from "../data/use-expenses-data";
 import { buildSettlements } from "../domain/settlements";
@@ -91,6 +93,14 @@ export function ExpensesScreen() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [busyReceiptExpenseId, setBusyReceiptExpenseId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{
+    expenseId: string;
+    title: string;
+    fileName: string;
+    mimeType?: string;
+    objectUrl: string;
+  } | null>(null);
   const [form, setForm] = useState<ExpenseUpsertInput>({
     concept: "",
     categoryId: "cat-food",
@@ -248,6 +258,58 @@ export function ExpensesScreen() {
     }
   }
 
+  async function handlePreviewReceipt(expense: Expense) {
+    if (!expense.receipt) {
+      return;
+    }
+
+    try {
+      setBusyReceiptExpenseId(expense.id);
+      setActionError(null);
+      const nextPreview = await storageService.getTripFilePreview(expense.receipt.storageKey);
+
+      if (!nextPreview?.objectUrl) {
+        throw new Error("No se pudo cargar una vista previa del ticket.");
+      }
+
+      setPreview({
+        expenseId: expense.id,
+        title: expense.concept,
+        fileName: expense.receipt.fileName,
+        mimeType: expense.receipt.mimeType ?? nextPreview.mimeType,
+        objectUrl: nextPreview.objectUrl
+      });
+    } catch (receiptError) {
+      setActionError(receiptError instanceof Error ? receiptError.message : "No se pudo abrir el ticket seleccionado.");
+    } finally {
+      setBusyReceiptExpenseId(null);
+    }
+  }
+
+  async function handleDownloadReceipt(expense: Expense) {
+    if (!expense.receipt) {
+      return;
+    }
+
+    try {
+      setBusyReceiptExpenseId(expense.id);
+      setActionError(null);
+      await storageService.downloadTripFileAs(expense.receipt.storageKey, expense.receipt.fileName, expense.receipt.fileUrl);
+    } catch (receiptError) {
+      setActionError(receiptError instanceof Error ? receiptError.message : "No se pudo descargar el ticket seleccionado.");
+    } finally {
+      setBusyReceiptExpenseId(null);
+    }
+  }
+
+  function closePreview() {
+    if (preview?.objectUrl) {
+      storageService.releaseObjectUrl(preview.objectUrl);
+    }
+
+    setPreview(null);
+  }
+
   if (loading || membersLoading || tripLoading) {
     return <div className="flex min-h-[40vh] items-center justify-center text-sm text-slate-500">Cargando gastos...</div>;
   }
@@ -258,6 +320,24 @@ export function ExpensesScreen() {
 
   return (
     <div className="space-y-8">
+      <FilePreviewDialog
+        open={Boolean(preview)}
+        title={preview?.title ?? "Vista previa"}
+        fileName={preview?.fileName ?? ""}
+        mimeType={preview?.mimeType}
+        objectUrl={preview?.objectUrl}
+        onClose={closePreview}
+        onDownload={() => {
+          if (!preview) {
+            return;
+          }
+
+          const expense = expenses.find((item) => item.id === preview.expenseId);
+          if (expense) {
+            void handleDownloadReceipt(expense);
+          }
+        }}
+      />
       <SectionHeader
         title="Gastos del viaje"
         description="Alta real con reparto entre participantes, ticket adjunto y exportacion basica para el MVP."
@@ -469,6 +549,14 @@ export function ExpensesScreen() {
                     <p className="mt-2 text-xs text-slate-400">
                       {expense.receipt?.uploadedAt ? formatExpenseDate(expense.receipt.uploadedAt) : "Ticket adjuntado"}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button variant="secondary" onClick={() => void handlePreviewReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                        {busyReceiptExpenseId === expense.id ? "Abriendo..." : "Visualizar"}
+                      </Button>
+                      <Button variant="secondary" onClick={() => void handleDownloadReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                        {busyReceiptExpenseId === expense.id ? "Descargando..." : "Descargar"}
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}
@@ -501,11 +589,30 @@ export function ExpensesScreen() {
                         </div>
                         {canEdit ? (
                           <div className="flex flex-wrap gap-2">
+                            {expense.receipt ? (
+                              <>
+                                <Button variant="secondary" onClick={() => void handlePreviewReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                                  {busyReceiptExpenseId === expense.id ? "Abriendo..." : "Visualizar"}
+                                </Button>
+                                <Button variant="secondary" onClick={() => void handleDownloadReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                                  {busyReceiptExpenseId === expense.id ? "Descargando..." : "Descargar"}
+                                </Button>
+                              </>
+                            ) : null}
                             <Button variant="secondary" onClick={() => startEditFlow(expense)} disabled={isSettlementClosed}>
                               Editar
                             </Button>
                             <Button variant="ghost" onClick={() => void handleDeleteExpense(expense.id)} disabled={isSettlementClosed}>
                               Borrar
+                            </Button>
+                          </div>
+                        ) : expense.receipt ? (
+                          <div className="flex flex-wrap gap-2">
+                            <Button variant="secondary" onClick={() => void handlePreviewReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                              {busyReceiptExpenseId === expense.id ? "Abriendo..." : "Visualizar"}
+                            </Button>
+                            <Button variant="secondary" onClick={() => void handleDownloadReceipt(expense)} disabled={busyReceiptExpenseId === expense.id}>
+                              {busyReceiptExpenseId === expense.id ? "Descargando..." : "Descargar"}
                             </Button>
                           </div>
                         ) : null}
