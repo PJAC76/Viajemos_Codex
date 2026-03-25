@@ -16,7 +16,7 @@ import { useTripOverview, useTripPermission } from "../../trips/data/use-trips-d
 import { useSession } from "../../../app/providers/session-provider";
 import { useRouteSnapshot } from "../../maps/data/use-route-snapshot";
 import { useItinerary } from "../data/use-itinerary-data";
-import type { ItineraryItem, ItineraryItemType, ItineraryItemUpsertInput } from "../domain/types";
+import type { ItineraryItem, ItineraryItemType, ItineraryItemUpsertInput, RouteSnapshotDraft } from "../domain/types";
 
 const emptyItemForm: ItineraryItemUpsertInput = {
   dayId: "",
@@ -86,6 +86,9 @@ export function ItineraryScreen() {
   const [form, setForm] = useState<ItineraryItemUpsertInput>(emptyItemForm);
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [previewRoute, setPreviewRoute] = useState<RouteSnapshotDraft | null>(null);
+  const [recalculateToken, setRecalculateToken] = useState(0);
+  const [savingRoute, setSavingRoute] = useState(false);
 
   useEffect(() => {
     if (!activeDayId && days.length > 0) {
@@ -96,11 +99,15 @@ export function ItineraryScreen() {
   const activeDay = days.find((day) => day.id === activeDayId) ?? days[0] ?? null;
   const activeItems = activeDay ? itemsByDay.get(activeDay.id) ?? [] : [];
   const linkedPlaces = useMemo(() => places.filter((place) => place.type !== "place" || place.address), [places]);
-  const { snapshot: routeSnapshot, loading: routeLoading } = useRouteSnapshot(tripId, activeDay?.id);
+  const { snapshot: routeSnapshot, loading: routeLoading, saveSnapshot } = useRouteSnapshot(tripId, activeDay?.id);
   const externalMapsUrl = useMemo(
     () => mapsRouteService.buildGoogleMapsDirectionsUrl(activeItems, "driving"),
     [activeItems]
   );
+
+  useEffect(() => {
+    setPreviewRoute(null);
+  }, [activeDay?.id, activeItems]);
 
   function resetForm() {
     setShowForm(false);
@@ -215,6 +222,42 @@ export function ItineraryScreen() {
     }
   }
 
+  async function handleRecalculateRoute() {
+    if (!tripId || !activeDay) {
+      return;
+    }
+
+    if (!mapsRouteService.canCalculateRoute(activeItems)) {
+      setActionError("Necesitas al menos dos paradas con direccion valida para recalcular la ruta.");
+      return;
+    }
+
+    if (!previewRoute) {
+      setActionError("Espera a que el mapa termine de calcular la vista previa y vuelve a intentarlo.");
+      setRecalculateToken((current) => current + 1);
+      return;
+    }
+
+    try {
+      setSavingRoute(true);
+      setActionError(null);
+      await saveSnapshot({
+        ...previewRoute,
+        tripId,
+        dayId: activeDay.id,
+        travelMode: "driving"
+      });
+    } catch (routeError) {
+      setActionError(
+        normalizeItineraryActionError(
+          routeError instanceof Error ? routeError.message : "No se pudo guardar la ruta recalculada."
+        )
+      );
+    } finally {
+      setSavingRoute(false);
+    }
+  }
+
   if (loading || tripLoading) {
     return <div className="flex min-h-[40vh] items-center justify-center text-sm text-slate-500">Cargando itinerario...</div>;
   }
@@ -232,7 +275,18 @@ export function ItineraryScreen() {
       <SectionHeader
         title="Itinerario diario"
         description="Eventos manuales o vinculados a lugares guardados, organizados por dia y listos para el modulo de mapa."
-        action={<Button onClick={startCreateFlow}>Anadir parada</Button>}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => void handleRecalculateRoute()}
+              disabled={!activeDay || !mapsRouteService.canCalculateRoute(activeItems) || savingRoute}
+            >
+              {savingRoute ? "Actualizando ruta..." : "Recalcular ruta"}
+            </Button>
+            <Button onClick={startCreateFlow}>Anadir parada</Button>
+          </div>
+        }
       />
 
       {actionError ? <p className="text-sm font-medium text-rose-600">{actionError}</p> : null}
@@ -290,6 +344,8 @@ export function ItineraryScreen() {
             heightClassName="h-56"
             emptyTitle="Aun no hay ruta del dia"
             emptyDescription="Anade al menos dos paradas con direccion valida para ver el mapa directamente desde el itinerario."
+            onRouteCalculated={setPreviewRoute}
+            recalculateToken={recalculateToken}
           />
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">

@@ -10,6 +10,8 @@ interface DayRoutePreviewProps {
   heightClassName?: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  onRouteCalculated?: (route: RouteSnapshotDraft) => void;
+  recalculateToken?: number;
 }
 
 export function DayRoutePreview({
@@ -17,7 +19,9 @@ export function DayRoutePreview({
   travelMode = "driving",
   heightClassName = "h-72",
   emptyTitle = "Aun no hay ruta disponible",
-  emptyDescription = "Anade al menos dos paradas con direccion valida para ver el mapa del dia."
+  emptyDescription = "Anade al menos dos paradas con direccion valida para ver el mapa del dia.",
+  onRouteCalculated,
+  recalculateToken = 0
 }: DayRoutePreviewProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const signatureRef = useRef<string | null>(null);
@@ -27,8 +31,8 @@ export function DayRoutePreview({
 
   const canRenderRoute = mapsRouteService.canCalculateRoute(items);
   const routeSignature = useMemo(
-    () => `${travelMode}:${items.map((item) => `${item.id}:${item.order}:${item.address}`).join("|")}`,
-    [items, travelMode]
+    () => `${travelMode}:${recalculateToken}:${items.map((item) => `${item.id}:${item.order}:${item.address}`).join("|")}`,
+    [items, recalculateToken, travelMode]
   );
 
   useEffect(() => {
@@ -63,6 +67,7 @@ export function DayRoutePreview({
         }
 
         setPreviewRoute(route);
+        onRouteCalculated?.(route);
       })
       .catch((error) => {
         if (!active) {
@@ -82,7 +87,7 @@ export function DayRoutePreview({
     return () => {
       active = false;
     };
-  }, [canRenderRoute, items, routeSignature, travelMode]);
+  }, [canRenderRoute, items, onRouteCalculated, routeSignature, travelMode]);
 
   if (!canRenderRoute) {
     return <EmptyState title={emptyTitle} description={emptyDescription} />;
